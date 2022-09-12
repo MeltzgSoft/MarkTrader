@@ -19,3 +19,6 @@ repos:
     -   id: mypy
         additional_dependencies:
             -   types-flask
+        args:
+            -   --strict
+            -   --ignore-missing-imports
