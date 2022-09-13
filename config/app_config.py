@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 import typing as t
 from urllib.parse import quote_plus
@@ -14,6 +15,7 @@ server_schema = yml.Map(
 
 brokerage_schema = yml.Map(
     {
+        "id": yml.Str(),
         "name": yml.Str(),
         "auth_uri": yml.Str(),
         "client_id": yml.Str(),
@@ -32,6 +34,7 @@ class ServerConfig:
 
 @dataclass
 class BrokerageConfig:
+    id: str
     name: str
     auth_uri: str
     client_id: str
@@ -51,7 +54,10 @@ class GlobalConfig:
     brokerage: BrokerageConfig
 
 
-def load_config(path: str) -> GlobalConfig:
+def load_config(path: t.Optional[str] = None) -> GlobalConfig:
+    path = path or os.environ.get("MARKTRADER_CONF")
+    if not path:
+        raise RuntimeError("Could not load config. No path supplied")
     with open(path) as f:
         return t.cast(
             GlobalConfig,

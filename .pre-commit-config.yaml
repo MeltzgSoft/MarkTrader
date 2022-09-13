@@ -22,4 +22,6 @@ repos:
         args:
             -   --strict
             -   --ignore-missing-imports
+            -   --allow-untyped-decorators
+            -   --allow-subclassing-any
         exclude: test/

@@ -14,7 +14,8 @@ def server_config():
 @pytest.fixture
 def td_brokerage():
     return BrokerageConfig(
-        "TD",
+        "td-a",
+        "TD Ameritrade",
         "http://authorize.me/client_id={client_id}&redirect_uri={redirect_uri}asdf",
         "my id",
         "http://my-site.com/",
@@ -30,6 +31,7 @@ def app_config_yaml(server_config, td_brokerage):
         server:
             port: {server_config.port}
         brokerage:
+            id: {td_brokerage.id}
             name: {td_brokerage.name}
             auth_uri: {td_brokerage.auth_uri}
             client_id: {td_brokerage.client_id}

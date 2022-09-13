@@ -1,3 +1,4 @@
-flask==2.2
-strictyaml==1.6
-dacite==1.6
+flask~=2.2
+flask-restplus~=0.13
+strictyaml~=1.6
+dacite~=1.6
