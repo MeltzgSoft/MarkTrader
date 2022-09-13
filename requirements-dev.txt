@@ -3,3 +3,4 @@
 pre-commit
 mypy
 black==22.8
+pytest
