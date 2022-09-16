@@ -55,7 +55,7 @@ class GlobalConfig:
 
 
 def load_config(path: t.Optional[str] = None) -> GlobalConfig:
-    path = path or os.environ.get("MARKTRADER_CONF")
+    path = path or os.environ.get("MARKTRADER_CONF") or "config.yml"
     if not path:
         raise RuntimeError("Could not load config. No path supplied")
     with open(path) as f:
