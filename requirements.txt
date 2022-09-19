@@ -1,1 +1,5 @@
-flask==2.2
+flask~=2.1
+flask-restx~=0.5
+strictyaml~=1.6
+dacite~=1.6
+werkzeug==2.1.2
