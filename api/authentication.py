@@ -27,7 +27,7 @@ class AuthorizationURI(Resource):
     def get(self, id: str) -> typing.Dict[str, str]:
         config = load_config()
         if config.brokerage.id != id:
-            api.abort(404)
+            api.abort(404, f"Brokerage auth URI not found for brokerage {id}")
         return {
             "id": config.brokerage.id,
             "name": config.brokerage.name,

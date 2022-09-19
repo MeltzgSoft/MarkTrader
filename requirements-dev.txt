@@ -3,4 +3,5 @@
 pre-commit
 mypy
 black~=22.8
-pytest
+pytest~=7.1
+mock~=4.0
