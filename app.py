@@ -14,4 +14,4 @@ def serve(path: str) -> Response:
 
 if __name__ == "__main__":
     config = load_config()
-    app.run(port=config.server.port)
+    app.run(port=config.server.port, ssl_context="adhoc")
