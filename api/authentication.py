@@ -1,6 +1,6 @@
 import typing
 
-from flask_restx import Namespace, fields, Resource
+from flask_restx import Namespace, Resource, fields
 
 from config.app_config import load_config
 

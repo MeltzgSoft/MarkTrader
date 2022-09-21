@@ -19,9 +19,15 @@ repos:
     -   id: mypy
         additional_dependencies:
             -   types-flask
+            -   types-requests
         args:
             -   --strict
             -   --ignore-missing-imports
             -   --allow-untyped-decorators
             -   --allow-subclassing-any
         exclude: test/
+-   repo: https://github.com/pycqa/isort
+    rev: 5.10.1
+    hooks:
+        - id: isort
+          name: isort (python)

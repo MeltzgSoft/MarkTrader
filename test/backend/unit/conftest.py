@@ -3,7 +3,7 @@ from textwrap import dedent
 
 import pytest
 
-from config.app_config import ServerConfig, BrokerageConfig, GlobalConfig
+from config.app_config import BrokerageConfig, GlobalConfig, ServerConfig
 
 
 @pytest.fixture
