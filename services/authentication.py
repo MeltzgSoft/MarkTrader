@@ -11,12 +11,14 @@ LOGGER = logging.getLogger(f"{APP_NAME}.auth_service")
 
 
 class AuthenticationService:
-    _SYSTEM = "MARK_TRADER"
     _ACTIVE_BROKERAGE_KEY = "ACTIVE_BROKERAGE"
     _ACCESS_TOKEN_KEY = "ACCESS_TOKEN"
     _REFRESH_TOKEN_KEY = "REFRESH_TOKEN"
     _ACCESS_EXPIRY_KEY = "ACCESS_EXPIRY"
     _REFRESH_EXPIRY_KEY = "REFRESH_EXPIRY"
+
+    def __init__(self, system: str = "MARK_TRADER") -> None:
+        self._SYSTEM = system
 
     def sign_in(
         self, brokerage_id: BrokerageId, access_code: str, redirect_uri: str

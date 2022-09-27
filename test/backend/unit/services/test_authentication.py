@@ -16,7 +16,7 @@ def test_sign_in():
     with mock.patch.object(
         TDAmeritradeBrokerageService, "get_access_tokens", return_value=tokens
     ):
-        auth_service = AuthenticationService()
+        auth_service = AuthenticationService("TEST")
         auth_service.sign_in(BrokerageId.TD, "access", "redirect.com")
 
         for key, expected_value in [

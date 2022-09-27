@@ -5,3 +5,4 @@ mypy
 black~=22.8
 pytest~=7.1
 mock~=4.0
+keyrings.alt~=4.2
