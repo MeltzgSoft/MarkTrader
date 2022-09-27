@@ -1,6 +1,6 @@
 import os
-from dataclasses import dataclass
 import typing as t
+from dataclasses import dataclass
 from urllib.parse import quote_plus
 
 import strictyaml as yml
@@ -25,6 +25,8 @@ brokerage_schema = yml.Map(
 
 
 config_schema = yml.Map({"server": server_schema, "brokerage": brokerage_schema})
+
+_CONFIG = None
 
 
 @dataclass
@@ -55,14 +57,15 @@ class GlobalConfig:
 
 
 def load_config(path: t.Optional[str] = None) -> GlobalConfig:
-    path = path or os.environ.get("MARKTRADER_CONF") or "config.yml"
-    if not path:
-        raise RuntimeError("Could not load config. No path supplied")
-    with open(path) as f:
-        return t.cast(
-            GlobalConfig,
-            from_dict(
+    global _CONFIG
+    if _CONFIG is None:
+        path = path or os.environ.get("MARKTRADER_CONF") or "config.yml"
+        if not path:
+            raise RuntimeError("Could not load config. No path supplied")
+        with open(path) as f:
+            _CONFIG = from_dict(
                 data_class=GlobalConfig,
                 data=yml.parser.load(f.read(), config_schema).data,
-            ),
-        )
+            )
+
+    return t.cast(GlobalConfig, _CONFIG)
