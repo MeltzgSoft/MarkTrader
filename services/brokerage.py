@@ -33,7 +33,10 @@ class TDAmeritradeBrokerageService(BaseBrokerageService):
     brokerage_id = BrokerageId.TD
 
     def get_access_tokens(self, access_code: str, redirect_uri: str) -> AuthTokens:
-        LOGGER.info(f"Brokerage {self.brokerage_id}: Get access tokens", extra={"brokerage_id": self.brokerage_id})
+        LOGGER.info(
+            f"Brokerage {self.brokerage_id}: Get access tokens",
+            extra={"brokerage_id": self.brokerage_id},
+        )
 
         config = load_config()
 
@@ -52,7 +55,7 @@ class TDAmeritradeBrokerageService(BaseBrokerageService):
         )
         if response.status_code != 200:
             LOGGER.error(
-                f"unexpected response for post access token: ({response.status_code}) {response.content}",
+                f"unexpected response for post access token: ({response.status_code}) {str(response.content)}",
                 extra={
                     "status_code": response.status_code,
                     "content": response.content,
@@ -61,7 +64,10 @@ class TDAmeritradeBrokerageService(BaseBrokerageService):
             raise RuntimeError("unexpected response for post access token")
 
         response_body = response.json()
-        logging.info(f"Brokerage {self.brokerage_id}: Login successful", extra={"brokerage_id": self.brokerage_id})
+        logging.info(
+            f"Brokerage {self.brokerage_id}: Login successful",
+            extra={"brokerage_id": self.brokerage_id},
+        )
         return AuthTokens(
             access_token=response_body["access_token"],
             access_expiry=datetime.datetime.now()

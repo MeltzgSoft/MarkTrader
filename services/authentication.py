@@ -22,7 +22,8 @@ class AuthenticationService:
         self, brokerage_id: BrokerageId, access_code: str, redirect_uri: str
     ) -> None:
         LOGGER.info(
-            f"Brokerage {brokerage_id}: retrieve access and refresh tokens", extra={"brokerage_id": brokerage_id}
+            f"Brokerage {brokerage_id}: retrieve access and refresh tokens",
+            extra={"brokerage_id": brokerage_id},
         )
 
         brokerage = get_brokerage_service(brokerage_id)
