@@ -1,8 +1,10 @@
 import typing
 
 from flask_restx import Namespace, Resource, fields
+from werkzeug.exceptions import NotFound, UnprocessableEntity
 
-from config.app_config import load_config
+from common.enums import BrokerageId
+from config import GlobalConfig
 
 api = Namespace("auth", description="Brokerage authentication related operations")
 
@@ -25,11 +27,17 @@ class AuthorizationURI(Resource):
     @api.doc("get auth URI")
     @api.marshal_with(auth_uri_response)
     def get(self, id: str) -> typing.Dict[str, str]:
-        config = load_config()
-        if config.brokerage.id != id:
-            api.abort(404, f"Brokerage auth URI not found for brokerage {id}")
+        try:
+            brokerage_id = BrokerageId(id)
+        except ValueError:
+            raise UnprocessableEntity(f"Brokerage ID {id} is not recognized")
+
+        brokerage = GlobalConfig().brokerage_map.get(brokerage_id)
+        if not brokerage:
+            raise NotFound(f"Brokerage auth URI not found for brokerage {id}")
+
         return {
-            "id": config.brokerage.id,
-            "name": config.brokerage.name,
-            "uri": config.brokerage.materialized_auth_url,
+            "id": brokerage.id.value,
+            "name": brokerage.name,
+            "uri": brokerage.materialized_auth_url,
         }

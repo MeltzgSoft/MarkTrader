@@ -9,7 +9,7 @@ import requests
 from common.constants import APP_NAME
 from common.enums import BrokerageId
 from common.models import AuthTokens
-from config.app_config import load_config
+from config import GlobalConfig
 
 LOGGER = logging.getLogger(f"{APP_NAME}.brokerage_service")
 
@@ -38,13 +38,13 @@ class TDAmeritradeBrokerageService(BaseBrokerageService):
             extra={"brokerage_id": self.brokerage_id},
         )
 
-        config = load_config()
+        brokerage = GlobalConfig().brokerage_map[self.brokerage_id]
 
         body = {
             "grant_type": "authorization_code",
             "access_type": "offline",
             "code": access_code,
-            "client_id": config.brokerage.client_id,
+            "client_id": brokerage.client_id,
             "redirect_uri": redirect_uri,
         }
 

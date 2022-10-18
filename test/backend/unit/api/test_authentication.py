@@ -1,26 +1,20 @@
 import pytest
-from mock import mock
+
+from config import GlobalConfig
+
+pytestmark = pytest.mark.usefixtures("global_config")
 
 
-@pytest.fixture
-def mock_load_config(global_config):
-    with mock.patch(
-        "api.authentication.load_config", return_value=global_config
-    ) as load_config:
-        yield load_config
-
-
-def test_get_auth_url(client, mock_load_config):
-    config = mock_load_config.return_value
+def test_get_auth_url(client):
+    config = GlobalConfig()
     response = client.get("/api/v1/auth/td-a")
     assert response.status_code == 200
-    assert response.json["id"] == config.brokerage.id
-    assert response.json["name"] == config.brokerage.name
-    assert response.json["uri"] == config.brokerage.materialized_auth_url
+    assert response.json["id"] == config.brokerages[0].id.value
+    assert response.json["name"] == config.brokerages[0].name
+    assert response.json["uri"] == config.brokerages[0].materialized_auth_url
 
 
-@pytest.mark.usefixtures("mock_load_config")
 def test_get_auth_url_not_found(client):
     response = client.get("/api/v1/auth/other")
-    assert response.status_code == 404
-    assert "Brokerage auth URI not found" in response.json["message"]
+    assert response.status_code == 422
+    assert "Brokerage ID other is not recognized" in response.json["message"]

@@ -6,7 +6,7 @@ from flask import Flask, Response, request, send_from_directory
 from api import blueprint
 from common.constants import APP_NAME
 from common.enums import BrokerageId
-from config.app_config import load_config
+from config import GlobalConfig
 from services.authentication import AuthenticationService
 
 app = Flask(APP_NAME, static_url_path="", static_folder="client/build")
@@ -29,5 +29,4 @@ def serve(path: str) -> Response:
 
 
 if __name__ == "__main__":
-    config = load_config()
-    app.run(port=config.server.port, ssl_context="adhoc")
+    app.run(port=GlobalConfig().server.port, ssl_context="adhoc")

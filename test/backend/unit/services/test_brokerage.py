@@ -4,21 +4,13 @@ import typing as t
 import mock
 import pytest
 
-from common.enums import BrokerageId
+from config import GlobalConfig
 from services.brokerage import TDAmeritradeBrokerageService
 
 
-@pytest.fixture
-def mock_load_config(global_config):
-    with mock.patch(
-        "services.brokerage.load_config", return_value=global_config
-    ) as load_config:
-        yield load_config
-
-
-@pytest.mark.usefixtures("mock_load_config")
+@pytest.mark.usefixtures("global_config")
 class TestTDAmeritradeBrokerageService:
-    def test_get_access_tokens(self, global_config):
+    def test_get_access_tokens(self):
         with mock.patch("services.brokerage.requests.post") as mock_post:
             mock_body = {
                 "access_token": "access",
@@ -36,7 +28,7 @@ class TestTDAmeritradeBrokerageService:
                 "grant_type": "authorization_code",
                 "access_type": "offline",
                 "code": "access code",
-                "client_id": global_config.brokerage.client_id,
+                "client_id": GlobalConfig().brokerages[0].client_id,
                 "redirect_uri": "http://url.com",
             }
             auth_tokens = TDAmeritradeBrokerageService().get_access_tokens(
