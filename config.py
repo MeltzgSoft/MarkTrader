@@ -14,16 +14,8 @@ class ServerConfig(ConfZ):
 class BrokerageConfig(ConfZ):
     id: BrokerageId
     name: str
-    auth_uri: str
     client_id: str
     redirect_uri: str
-
-    @property
-    def materialized_auth_url(self) -> str:
-        return self.auth_uri.format(
-            redirect_uri=quote_plus(self.redirect_uri),
-            client_id=quote_plus(self.client_id),
-        )
 
 
 class GlobalConfig(ConfZ):

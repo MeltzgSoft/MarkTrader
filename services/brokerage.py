@@ -3,6 +3,7 @@ import datetime
 import logging
 import typing as t
 from abc import ABC
+from urllib.parse import quote_plus
 
 import requests
 
@@ -28,9 +29,16 @@ class BaseBrokerageService(ABC):
     def get_access_tokens(self, access_code: str, redirect_uri: str) -> AuthTokens:
         raise NotImplemented
 
+    @property
+    @abc.abstractmethod
+    def auth_uri(self):
+        raise NotImplemented
+
 
 class TDAmeritradeBrokerageService(BaseBrokerageService):
     brokerage_id = BrokerageId.TD
+
+    OAUTH_URI_FORMATTER = "https://auth.tdameritrade.com/auth?response_type=code&redirect_uri={redirect_uri}&client_id={client_id}%40AMER.OAUTHAP"
 
     def get_access_tokens(self, access_code: str, redirect_uri: str) -> AuthTokens:
         LOGGER.info(
@@ -71,10 +79,18 @@ class TDAmeritradeBrokerageService(BaseBrokerageService):
         return AuthTokens(
             access_token=response_body["access_token"],
             access_expiry=datetime.datetime.now()
-            + datetime.timedelta(seconds=response_body["expires_in"]),
+                          + datetime.timedelta(seconds=response_body["expires_in"]),
             refresh_token=response_body["refresh_token"],
             refresh_expiry=datetime.datetime.now()
-            + datetime.timedelta(seconds=response_body["refresh_token_expires_in"]),
+                           + datetime.timedelta(seconds=response_body["refresh_token_expires_in"]),
+        )
+
+    @property
+    def auth_uri(self):
+        brokerage = GlobalConfig().brokerage_map[self.brokerage_id]
+        return self.OAUTH_URI_FORMATTER.format(
+            redirect_uri=quote_plus(brokerage.redirect_uri),
+            client_id=quote_plus(brokerage.client_id),
         )
 
 

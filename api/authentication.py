@@ -5,6 +5,7 @@ from werkzeug.exceptions import NotFound, UnprocessableEntity
 
 from common.enums import BrokerageId
 from config import GlobalConfig
+from services.brokerage import get_brokerage_service
 
 api = Namespace("auth", description="Brokerage authentication related operations")
 
@@ -32,12 +33,15 @@ class AuthorizationURI(Resource):
         except ValueError:
             raise UnprocessableEntity(f"Brokerage ID {id} is not recognized")
 
-        brokerage = GlobalConfig().brokerage_map.get(brokerage_id)
-        if not brokerage:
+        try:
+            brokerage_service = get_brokerage_service(brokerage_id)
+        except ValueError:
             raise NotFound(f"Brokerage auth URI not found for brokerage {id}")
+
+        brokerage = GlobalConfig().brokerage_map[brokerage_id]
 
         return {
             "id": brokerage.id.value,
             "name": brokerage.name,
-            "uri": brokerage.materialized_auth_url,
+            "uri": brokerage_service.auth_uri,
         }
