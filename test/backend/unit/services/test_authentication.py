@@ -11,7 +11,11 @@ from services.brokerage import TDAmeritradeBrokerageService
 
 def test_sign_in():
     tokens = AuthTokens(
-        "access", datetime.datetime.now(), "refresh", datetime.datetime.now()
+        BrokerageId.TD,
+        "access",
+        datetime.datetime.now(),
+        "refresh",
+        datetime.datetime.now(),
     )
     with mock.patch.object(
         TDAmeritradeBrokerageService, "get_access_tokens", return_value=tokens

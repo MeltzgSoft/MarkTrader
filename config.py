@@ -1,6 +1,5 @@
 import typing as t
 from pathlib import Path
-from urllib.parse import quote_plus
 
 from confz import ConfZ, ConfZFileSource
 
@@ -18,8 +17,14 @@ class BrokerageConfig(ConfZ):
     redirect_uri: str
 
 
+class AuthenticationConfig(ConfZ):
+    login_check_delay_seconds: int = 5 * 60
+    refresh_buffer_seconds: int = 5 * 60
+
+
 class GlobalConfig(ConfZ):
     server: ServerConfig
+    authentication: AuthenticationConfig = AuthenticationConfig()
     brokerages: t.List[BrokerageConfig]
 
     CONFIG_SOURCES = ConfZFileSource(file=Path("./config.yml"))

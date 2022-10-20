@@ -29,9 +29,15 @@ class BaseBrokerageService(ABC):
     def get_access_tokens(self, access_code: str, redirect_uri: str) -> AuthTokens:
         raise NotImplemented
 
+    @abc.abstractmethod
+    def refresh_tokens(
+        self, refresh_token: str, update_refresh_token: bool = False
+    ) -> AuthTokens:
+        raise NotImplemented
+
     @property
     @abc.abstractmethod
-    def auth_uri(self):
+    def auth_uri(self) -> str:
         raise NotImplemented
 
 
@@ -77,16 +83,22 @@ class TDAmeritradeBrokerageService(BaseBrokerageService):
             extra={"brokerage_id": self.brokerage_id},
         )
         return AuthTokens(
+            brokerage_id=self.brokerage_id,
             access_token=response_body["access_token"],
             access_expiry=datetime.datetime.now()
-                          + datetime.timedelta(seconds=response_body["expires_in"]),
+            + datetime.timedelta(seconds=response_body["expires_in"]),
             refresh_token=response_body["refresh_token"],
             refresh_expiry=datetime.datetime.now()
-                           + datetime.timedelta(seconds=response_body["refresh_token_expires_in"]),
+            + datetime.timedelta(seconds=response_body["refresh_token_expires_in"]),
         )
 
+    def refresh_tokens(
+        self, refresh_token: str, update_refresh_token: bool = False
+    ) -> AuthTokens:
+        pass
+
     @property
-    def auth_uri(self):
+    def auth_uri(self) -> str:
         brokerage = GlobalConfig().brokerage_map[self.brokerage_id]
         return self.OAUTH_URI_FORMATTER.format(
             redirect_uri=quote_plus(brokerage.redirect_uri),
