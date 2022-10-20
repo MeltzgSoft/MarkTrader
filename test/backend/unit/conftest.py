@@ -6,7 +6,7 @@ from config import GlobalConfig
 
 @pytest.fixture
 def server_config():
-    return {"port": 9001}
+    return {"port": 9001, "host": "http://my-site.com"}
 
 
 @pytest.fixture
@@ -16,7 +16,6 @@ def td_brokerage():
         "name": "TD Ameritrade",
         "auth_uri": "http://authorize.me/client_id={client_id}&redirect_uri={redirect_uri}asdf",
         "client_id": "my id",
-        "redirect_uri": "http://my-site.com/",
     }
 
 
