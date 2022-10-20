@@ -27,7 +27,7 @@ def test_sign_in():
         TDAmeritradeBrokerageService, "get_access_tokens", return_value=tokens
     ):
 
-        auth_service.sign_in(BrokerageId.TD, "access", "redirect.com")
+        auth_service.sign_in(BrokerageId.TD, "access")
 
         for key, expected_value in [
             (auth_service._ACTIVE_BROKERAGE_KEY, BrokerageId.TD.value),
@@ -62,7 +62,7 @@ def test_sign_out():
     with mock.patch.object(
         TDAmeritradeBrokerageService, "get_access_tokens", return_value=tokens
     ):
-        auth_service.sign_in(BrokerageId.TD, "access", "redirect.com")
+        auth_service.sign_in(BrokerageId.TD, "access")
         assert auth_service.active_brokerage == BrokerageId.TD
         assert auth_service.active_tokens == tokens
         auth_service.sign_out()

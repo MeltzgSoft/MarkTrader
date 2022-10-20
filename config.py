@@ -8,13 +8,17 @@ from common.enums import BrokerageId
 
 class ServerConfig(ConfZ):
     port: int
+    host: str
+
+    @property
+    def redirect_uri(self) -> str:
+        return f"{self.host}:{self.port}/"
 
 
 class BrokerageConfig(ConfZ):
     id: BrokerageId
     name: str
     client_id: str
-    redirect_uri: str
 
 
 class AuthenticationConfig(ConfZ):

@@ -70,9 +70,7 @@ class AuthenticationService:
                 )
             return None
 
-    def sign_in(
-        self, brokerage_id: BrokerageId, access_code: str, redirect_uri: str
-    ) -> None:
+    def sign_in(self, brokerage_id: BrokerageId, access_code: str) -> None:
         LOGGER.info(
             f"Brokerage {brokerage_id}: retrieve access and refresh tokens",
             extra={"brokerage_id": brokerage_id},
@@ -81,7 +79,7 @@ class AuthenticationService:
         self.sign_out()
 
         brokerage = get_brokerage_service(brokerage_id)
-        access_tokens = brokerage.get_access_tokens(access_code, redirect_uri)
+        access_tokens = brokerage.get_access_tokens(access_code)
         self.set_access_keys(access_tokens)
 
     def set_access_keys(self, access_tokens: AuthTokens) -> None:
@@ -126,7 +124,7 @@ class AuthenticationService:
 
 
 # The token daemon is responsible for keeping the active brokerage signed in
-def refresh_access(auth_service: AuthenticationService, redirect_uri: str) -> None:
+def refresh_access(auth_service: AuthenticationService) -> None:
     auth_tokens = auth_service.active_tokens
     if not auth_tokens:
         LOGGER.info("No active brokerage")
@@ -144,27 +142,29 @@ def refresh_access(auth_service: AuthenticationService, redirect_uri: str) -> No
             - GlobalConfig().authentication.refresh_buffer_seconds,
         )
 
+        LOGGER.info(f"Refresh tokens in {to_wait} seconds")
+        LOGGER.info(f"Update refresh token? {update_refresh_token}")
+
         safe_sleep(to_wait)
         brokerage_service = get_brokerage_service(auth_tokens.brokerage_id)
         new_auth_tokens = brokerage_service.refresh_tokens(
-            auth_tokens, redirect_uri, update_refresh_token=update_refresh_token
+            auth_tokens, update_refresh_token=update_refresh_token
         )
         auth_service.set_access_keys(new_auth_tokens)
 
 
-def _daemon_loop(redirect_uri: str) -> None:
+def _daemon_loop() -> None:
     auth_service = AuthenticationService()
     while True:
-        refresh_access(auth_service, redirect_uri)
+        refresh_access(auth_service)
 
 
-def start_daemon(redirect_uri: str) -> None:
+def start_daemon() -> None:
     global daemon_thread
     with daemon_lock:
         if daemon_thread is None:
             daemon_thread = threading.Thread(
                 target=_daemon_loop,
-                args=(redirect_uri,),
                 daemon=True,
                 name="ACCESS_TOKEN_DAEMON",
             )

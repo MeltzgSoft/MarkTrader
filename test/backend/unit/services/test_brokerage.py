@@ -1,5 +1,4 @@
 import datetime
-import typing as t
 
 import mock
 import pytest
@@ -41,10 +40,10 @@ class TestTDAmeritradeBrokerageService:
                 "access_type": "offline",
                 "code": "access code",
                 "client_id": GlobalConfig().brokerages[0].client_id,
-                "redirect_uri": "http://url.com",
+                "redirect_uri": GlobalConfig().server.redirect_uri,
             }
             auth_tokens = TDAmeritradeBrokerageService().get_access_tokens(
-                expected_call["code"], t.cast(str, expected_call["redirect_uri"])
+                expected_call["code"]
             )
 
             assert auth_tokens.access_token == mock_body["access_token"]
@@ -71,13 +70,12 @@ class TestTDAmeritradeBrokerageService:
             mock_post.return_value = mock_response
 
             expected_call = {
-                "grant_type": "refresh_code",
+                "grant_type": "refresh_token",
                 "client_id": GlobalConfig().brokerages[0].client_id,
-                "redirect_uri": "http://url.com",
+                "redirect_uri": GlobalConfig().server.redirect_uri,
+                "refresh_token": old_tokens.refresh_token,
             }
-            auth_tokens = TDAmeritradeBrokerageService().refresh_tokens(
-                old_tokens, expected_call["redirect_uri"]
-            )
+            auth_tokens = TDAmeritradeBrokerageService().refresh_tokens(old_tokens)
 
             assert auth_tokens.access_token == mock_body["access_token"]
             assert auth_tokens.refresh_token == old_tokens.refresh_token
@@ -103,13 +101,14 @@ class TestTDAmeritradeBrokerageService:
             mock_post.return_value = mock_response
 
             expected_call = {
-                "grant_type": "refresh_code",
+                "grant_type": "refresh_token",
                 "client_id": GlobalConfig().brokerages[0].client_id,
-                "redirect_uri": "http://url.com",
+                "redirect_uri": GlobalConfig().server.redirect_uri,
                 "access_type": "offline",
+                "refresh_token": old_tokens.refresh_token,
             }
             auth_tokens = TDAmeritradeBrokerageService().refresh_tokens(
-                old_tokens, expected_call["redirect_uri"], True
+                old_tokens, True
             )
 
             assert auth_tokens.access_token == mock_body["access_token"]

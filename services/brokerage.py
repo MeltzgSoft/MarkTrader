@@ -26,14 +26,13 @@ class BaseBrokerageService(ABC):
             raise RuntimeError("brokerage_id must not be None")
 
     @abc.abstractmethod
-    def get_access_tokens(self, access_code: str, redirect_uri: str) -> AuthTokens:
+    def get_access_tokens(self, access_code: str) -> AuthTokens:
         raise NotImplemented
 
     @abc.abstractmethod
     def refresh_tokens(
         self,
         auth_tokens: AuthTokens,
-        redirect_uri: str,
         update_refresh_token: bool = False,
     ) -> AuthTokens:
         raise NotImplemented
@@ -49,7 +48,7 @@ class TDAmeritradeBrokerageService(BaseBrokerageService):
 
     OAUTH_URI_FORMATTER = "https://auth.tdameritrade.com/auth?response_type=code&redirect_uri={redirect_uri}&client_id={client_id}%40AMER.OAUTHAP"
 
-    def get_access_tokens(self, access_code: str, redirect_uri: str) -> AuthTokens:
+    def get_access_tokens(self, access_code: str) -> AuthTokens:
         LOGGER.info(
             f"Brokerage {self.brokerage_id}: Get access tokens",
             extra={"brokerage_id": self.brokerage_id},
@@ -62,7 +61,7 @@ class TDAmeritradeBrokerageService(BaseBrokerageService):
             "access_type": "offline",
             "code": access_code,
             "client_id": brokerage.client_id,
-            "redirect_uri": redirect_uri,
+            "redirect_uri": GlobalConfig().server.redirect_uri,
         }
 
         return self._make_access_token_request(body)
@@ -70,14 +69,14 @@ class TDAmeritradeBrokerageService(BaseBrokerageService):
     def refresh_tokens(
         self,
         auth_tokens: AuthTokens,
-        redirect_uri: str,
         update_refresh_token: bool = False,
     ) -> AuthTokens:
         brokerage = GlobalConfig().brokerage_map[self.brokerage_id]
         body = {
-            "grant_type": "refresh_code",
+            "grant_type": "refresh_token",
             "client_id": brokerage.client_id,
-            "redirect_uri": redirect_uri,
+            "redirect_uri": GlobalConfig().server.redirect_uri,
+            "refresh_token": auth_tokens.refresh_token,
         }
         if update_refresh_token:
             body["access_type"] = "offline"
@@ -88,7 +87,7 @@ class TDAmeritradeBrokerageService(BaseBrokerageService):
     def auth_uri(self) -> str:
         brokerage = GlobalConfig().brokerage_map[self.brokerage_id]
         return self.OAUTH_URI_FORMATTER.format(
-            redirect_uri=quote_plus(brokerage.redirect_uri),
+            redirect_uri=quote_plus(GlobalConfig().server.redirect_uri),
             client_id=quote_plus(brokerage.client_id),
         )
 
@@ -111,7 +110,7 @@ class TDAmeritradeBrokerageService(BaseBrokerageService):
             raise RuntimeError("unexpected response for post access token")
 
         response_body = response.json()
-        logging.info(
+        LOGGER.info(
             f"Brokerage {self.brokerage_id}: Login successful",
             extra={"brokerage_id": self.brokerage_id},
         )
