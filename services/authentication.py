@@ -19,49 +19,6 @@ daemon_lock = threading.Lock()
 daemon_thread = None
 
 
-# The token daemon is responsible for keeping the active brokerage signed in
-def refresh_access() -> None:
-    auth_service = AuthenticationService()
-    auth_tokens = auth_service.active_tokens
-    if not auth_tokens:
-        LOGGER.info("No active brokerage")
-        safe_sleep(GlobalConfig().authentication.login_check_delay_seconds)
-    else:
-        now = datetime.datetime.now()
-        access_remaining = auth_tokens.access_expiry - now
-        refresh_remaining = auth_tokens.refresh_expiry - now
-
-        update_refresh_token = refresh_remaining <= access_remaining
-
-        to_wait = max(
-            0,
-            int(min(access_remaining, refresh_remaining).total_seconds())
-            - GlobalConfig().authentication.refresh_buffer_seconds,
-        )
-
-        safe_sleep(to_wait)
-        brokerage_service = get_brokerage_service(auth_tokens.brokerage_id)
-        new_auth_tokens = brokerage_service.refresh_tokens(
-            auth_tokens.refresh_token, update_refresh_token=update_refresh_token
-        )
-        auth_service.set_access_keys(auth_tokens.brokerage_id, new_auth_tokens)
-
-
-def _daemon_loop() -> None:
-    while True:
-        refresh_access()
-
-
-def start_daemon() -> None:
-    global daemon_thread
-    with daemon_lock:
-        if daemon_thread is None:
-            daemon_thread = threading.Thread(
-                target=_daemon_loop, daemon=True, name="ACCESS_TOKEN_DAEMON"
-            )
-            daemon_thread.start()
-
-
 class AuthenticationService:
     _ACTIVE_BROKERAGE_KEY = "ACTIVE_BROKERAGE"
     _ACCESS_TOKEN_KEY = "ACCESS_TOKEN"
@@ -125,16 +82,14 @@ class AuthenticationService:
 
         brokerage = get_brokerage_service(brokerage_id)
         access_tokens = brokerage.get_access_tokens(access_code, redirect_uri)
-        self.set_access_keys(brokerage_id, access_tokens)
+        self.set_access_keys(access_tokens)
 
-    def set_access_keys(
-        self, brokerage_id: BrokerageId, access_tokens: AuthTokens
-    ) -> None:
+    def set_access_keys(self, access_tokens: AuthTokens) -> None:
         with signin_lock:
             keyring.set_password(
                 self._SYSTEM,
                 self._ACTIVE_BROKERAGE_KEY,
-                t.cast(str, brokerage_id.value),
+                t.cast(str, access_tokens.brokerage_id.value),
             )
             keyring.set_password(
                 self._SYSTEM, self._ACCESS_TOKEN_KEY, access_tokens.access_token
@@ -154,8 +109,8 @@ class AuthenticationService:
             )
 
         LOGGER.info(
-            f"Brokerage {brokerage_id}: authentication information saved to keyring",
-            extra={"brokerage_id": brokerage_id},
+            f"Brokerage {access_tokens.brokerage_id}: authentication information saved to keyring",
+            extra={"brokerage_id": access_tokens.brokerage_id},
         )
 
     def sign_out(self) -> None:
@@ -168,3 +123,46 @@ class AuthenticationService:
                 for key in self._ALL_KEYS:
                     LOGGER.debug(f"Removing {key} from keyring")
                     keyring.delete_password(self._SYSTEM, key)
+
+
+# The token daemon is responsible for keeping the active brokerage signed in
+def refresh_access(auth_service: AuthenticationService) -> None:
+    auth_tokens = auth_service.active_tokens
+    if not auth_tokens:
+        LOGGER.info("No active brokerage")
+        safe_sleep(GlobalConfig().authentication.login_check_delay_seconds)
+    else:
+        now = datetime.datetime.now()
+        access_remaining = auth_tokens.access_expiry - now
+        refresh_remaining = auth_tokens.refresh_expiry - now
+
+        update_refresh_token = refresh_remaining <= access_remaining
+
+        to_wait = max(
+            0,
+            int(min(access_remaining, refresh_remaining).total_seconds())
+            - GlobalConfig().authentication.refresh_buffer_seconds,
+        )
+
+        safe_sleep(to_wait)
+        brokerage_service = get_brokerage_service(auth_tokens.brokerage_id)
+        new_auth_tokens = brokerage_service.refresh_tokens(
+            auth_tokens, update_refresh_token=update_refresh_token
+        )
+        auth_service.set_access_keys(new_auth_tokens)
+
+
+def _daemon_loop() -> None:
+    auth_service = AuthenticationService()
+    while True:
+        refresh_access(auth_service)
+
+
+def start_daemon() -> None:
+    global daemon_thread
+    with daemon_lock:
+        if daemon_thread is None:
+            daemon_thread = threading.Thread(
+                target=_daemon_loop, daemon=True, name="ACCESS_TOKEN_DAEMON"
+            )
+            daemon_thread.start()

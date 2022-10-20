@@ -31,7 +31,7 @@ class BaseBrokerageService(ABC):
 
     @abc.abstractmethod
     def refresh_tokens(
-        self, refresh_token: str, update_refresh_token: bool = False
+        self, auth_tokens: AuthTokens, update_refresh_token: bool = False
     ) -> AuthTokens:
         raise NotImplemented
 
@@ -93,7 +93,7 @@ class TDAmeritradeBrokerageService(BaseBrokerageService):
         )
 
     def refresh_tokens(
-        self, refresh_token: str, update_refresh_token: bool = False
+        self, auth_tokens: AuthTokens, update_refresh_token: bool = False
     ) -> AuthTokens:
         pass
 
