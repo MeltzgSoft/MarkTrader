@@ -126,7 +126,7 @@ class AuthenticationService:
 
 
 # The token daemon is responsible for keeping the active brokerage signed in
-def refresh_access(auth_service: AuthenticationService) -> None:
+def refresh_access(auth_service: AuthenticationService, redirect_uri: str) -> None:
     auth_tokens = auth_service.active_tokens
     if not auth_tokens:
         LOGGER.info("No active brokerage")
@@ -147,22 +147,25 @@ def refresh_access(auth_service: AuthenticationService) -> None:
         safe_sleep(to_wait)
         brokerage_service = get_brokerage_service(auth_tokens.brokerage_id)
         new_auth_tokens = brokerage_service.refresh_tokens(
-            auth_tokens, update_refresh_token=update_refresh_token
+            auth_tokens, redirect_uri, update_refresh_token=update_refresh_token
         )
         auth_service.set_access_keys(new_auth_tokens)
 
 
-def _daemon_loop() -> None:
+def _daemon_loop(redirect_uri: str) -> None:
     auth_service = AuthenticationService()
     while True:
-        refresh_access(auth_service)
+        refresh_access(auth_service, redirect_uri)
 
 
-def start_daemon() -> None:
+def start_daemon(redirect_uri: str) -> None:
     global daemon_thread
     with daemon_lock:
         if daemon_thread is None:
             daemon_thread = threading.Thread(
-                target=_daemon_loop, daemon=True, name="ACCESS_TOKEN_DAEMON"
+                target=_daemon_loop,
+                args=(redirect_uri,),
+                daemon=True,
+                name="ACCESS_TOKEN_DAEMON",
             )
             daemon_thread.start()

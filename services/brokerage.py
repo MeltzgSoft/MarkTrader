@@ -31,7 +31,10 @@ class BaseBrokerageService(ABC):
 
     @abc.abstractmethod
     def refresh_tokens(
-        self, auth_tokens: AuthTokens, update_refresh_token: bool = False
+        self,
+        auth_tokens: AuthTokens,
+        redirect_uri: str,
+        update_refresh_token: bool = False,
     ) -> AuthTokens:
         raise NotImplemented
 
@@ -62,6 +65,36 @@ class TDAmeritradeBrokerageService(BaseBrokerageService):
             "redirect_uri": redirect_uri,
         }
 
+        return self._make_access_token_request(body)
+
+    def refresh_tokens(
+        self,
+        auth_tokens: AuthTokens,
+        redirect_uri: str,
+        update_refresh_token: bool = False,
+    ) -> AuthTokens:
+        brokerage = GlobalConfig().brokerage_map[self.brokerage_id]
+        body = {
+            "grant_type": "refresh_code",
+            "client_id": brokerage.client_id,
+            "redirect_uri": redirect_uri,
+        }
+        if update_refresh_token:
+            body["access_type"] = "offline"
+
+        return self._make_access_token_request(body, auth_tokens)
+
+    @property
+    def auth_uri(self) -> str:
+        brokerage = GlobalConfig().brokerage_map[self.brokerage_id]
+        return self.OAUTH_URI_FORMATTER.format(
+            redirect_uri=quote_plus(brokerage.redirect_uri),
+            client_id=quote_plus(brokerage.client_id),
+        )
+
+    def _make_access_token_request(
+        self, body: t.Dict[str, str], old_tokens: t.Optional[AuthTokens] = None
+    ) -> AuthTokens:
         response = requests.post(
             "https://api.tdameritrade.com/v1/oauth2/token",
             data=body,
@@ -82,27 +115,23 @@ class TDAmeritradeBrokerageService(BaseBrokerageService):
             f"Brokerage {self.brokerage_id}: Login successful",
             extra={"brokerage_id": self.brokerage_id},
         )
+        if old_tokens:
+            default_refresh_token = old_tokens.refresh_token
+            default_refresh_expiry = old_tokens.refresh_expiry
+        else:
+            default_refresh_token = None
+            default_refresh_expiry = datetime.datetime.now()
+
         return AuthTokens(
             brokerage_id=self.brokerage_id,
             access_token=response_body["access_token"],
             access_expiry=datetime.datetime.now()
             + datetime.timedelta(seconds=response_body["expires_in"]),
-            refresh_token=response_body["refresh_token"],
+            refresh_token=response_body.get("refresh_token", default_refresh_token),
             refresh_expiry=datetime.datetime.now()
-            + datetime.timedelta(seconds=response_body["refresh_token_expires_in"]),
-        )
-
-    def refresh_tokens(
-        self, auth_tokens: AuthTokens, update_refresh_token: bool = False
-    ) -> AuthTokens:
-        pass
-
-    @property
-    def auth_uri(self) -> str:
-        brokerage = GlobalConfig().brokerage_map[self.brokerage_id]
-        return self.OAUTH_URI_FORMATTER.format(
-            redirect_uri=quote_plus(brokerage.redirect_uri),
-            client_id=quote_plus(brokerage.client_id),
+            + datetime.timedelta(seconds=response_body["refresh_token_expires_in"])
+            if "refresh_token_expires_in" in response_body
+            else default_refresh_expiry,
         )
 
 
