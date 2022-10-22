@@ -1,5 +1,5 @@
 import React from 'react';
-import { getAuthUri, getSignInStatus } from './apiClient';
+import { getAuthUri, getSignInStatus, signOut } from './apiClient';
 import './authentication.css'
 
 interface AuthenticatorState {
@@ -20,7 +20,11 @@ export default class Authenticator extends React.Component<Record<string, unknow
         this.state = {
             isSignedIn: false
         };
-        getSignInStatus().then(authStatus => this.setState({["isSignedIn"]: authStatus.signedIn}))
+
+        this.updateStatus = this.updateStatus.bind(this);
+        this.signOut = this.signOut.bind(this);
+
+        this.updateStatus();
     }
 
     render(): React.ReactNode {
@@ -28,8 +32,8 @@ export default class Authenticator extends React.Component<Record<string, unknow
             <AuthenticatorStatus isSignedIn={this.state.isSignedIn}></AuthenticatorStatus>
             <div>
                 <button onClick={this.initiateAuth}>Sign In</button>
-                <button>Refresh Status</button>
-                <button>Sign Out</button>
+                <button onClick={this.updateStatus}>Refresh Status</button>
+                <button onClick={this.signOut}>Sign Out</button>
             </div>
         </div>;
     }
@@ -38,5 +42,13 @@ export default class Authenticator extends React.Component<Record<string, unknow
         getAuthUri('td-a').then(authInfo =>
             window.location.replace(authInfo.uri)
         );
+    }
+
+    updateStatus(): void {
+        getSignInStatus().then(authStatus => this.setState({["isSignedIn"]: authStatus.signedIn}));
+    }
+
+    signOut(): void {
+        signOut().then(_ => this.updateStatus())
     }
 }

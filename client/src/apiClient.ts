@@ -24,4 +24,11 @@ async function getSignInStatus(): Promise<AuthStatus> {
     return res_1 as AuthStatus;
 }
 
-export {getAuthUri, getSignInStatus};
+async function signOut(): Promise<boolean> {
+    const uri = new URL(`/api/v1/auth/`, window.location.origin);
+    const res = await fetch(uri, {method: 'DELETE'});
+    const status = await res.status;
+    return status == 200
+}
+
+export {getAuthUri, getSignInStatus, signOut};
