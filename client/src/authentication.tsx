@@ -31,9 +31,12 @@ export default class Authenticator extends React.Component<Record<string, unknow
         return <div style={{'display': 'inline-block'}}>
             <AuthenticatorStatus isSignedIn={this.state.isSignedIn}></AuthenticatorStatus>
             <div>
-                <button onClick={this.initiateAuth}>Sign In</button>
-                <button onClick={this.updateStatus}>Refresh Status</button>
-                <button onClick={this.signOut}>Sign Out</button>
+                {!this.state.isSignedIn ?
+                    <button onClick={this.initiateAuth}>Sign In</button> :
+                    <div>
+                        <button onClick={this.updateStatus}>Refresh Status</button>
+                        <button onClick={this.signOut}>Sign Out</button>
+                    </div>}
             </div>
         </div>;
     }
