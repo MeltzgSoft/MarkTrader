@@ -1,6 +1,6 @@
 import datetime
 import logging
-import threading
+import multiprocessing
 import typing as t
 
 import keyring
@@ -14,9 +14,9 @@ from services.brokerage import get_brokerage_service
 
 LOGGER = logging.getLogger(f"{APP_NAME}.auth_service")
 
-signin_lock = threading.RLock()
-daemon_lock = threading.Lock()
-daemon_thread = None
+signin_lock = multiprocessing.RLock()
+daemon_lock = multiprocessing.Lock()
+daemon_proc = None
 
 
 class AuthenticationService:
@@ -81,6 +81,7 @@ class AuthenticationService:
         brokerage = get_brokerage_service(brokerage_id)
         access_tokens = brokerage.get_access_tokens(access_code)
         self.set_access_keys(access_tokens)
+        start_daemon()
 
     def set_access_keys(self, access_tokens: AuthTokens) -> None:
         with signin_lock:
@@ -121,6 +122,7 @@ class AuthenticationService:
                 for key in self._ALL_KEYS:
                     LOGGER.debug(f"Removing {key} from keyring")
                     keyring.delete_password(self._SYSTEM, key)
+        start_daemon()
 
 
 # The token daemon is responsible for keeping the active brokerage signed in
@@ -160,12 +162,13 @@ def _daemon_loop() -> None:
 
 
 def start_daemon() -> None:
-    global daemon_thread
+    global daemon_proc
     with daemon_lock:
-        if daemon_thread is None:
-            daemon_thread = threading.Thread(
-                target=_daemon_loop,
-                daemon=True,
-                name="ACCESS_TOKEN_DAEMON",
-            )
-            daemon_thread.start()
+        if daemon_proc is not None:
+            daemon_proc.terminate()
+        daemon_proc = multiprocessing.Process(
+            target=_daemon_loop,
+            daemon=True,
+            name="ACCESS_TOKEN_DAEMON",
+        )
+        daemon_proc.start()

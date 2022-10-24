@@ -13,7 +13,13 @@ from services.brokerage import TDAmeritradeBrokerageService
 pytestmark = pytest.mark.usefixtures("global_config")
 
 
-def test_sign_in():
+@pytest.fixture
+def mock_start_daemon():
+    with mock.patch("services.authentication.start_daemon") as mock_start:
+        yield mock_start
+
+
+def test_sign_in(mock_start_daemon):
     tokens = AuthTokens(
         BrokerageId.TD,
         "access",
@@ -30,6 +36,8 @@ def test_sign_in():
     ):
 
         auth_service.sign_in(BrokerageId.TD, "access")
+
+        assert mock_start_daemon.call_count == 2
 
         for key, expected_value in [
             (auth_service._ACTIVE_BROKERAGE_KEY, BrokerageId.TD.value),
@@ -49,7 +57,7 @@ def test_sign_in():
             keyring.delete_password(auth_service._SYSTEM, key)
 
 
-def test_sign_out():
+def test_sign_out(mock_start_daemon):
     tokens = AuthTokens(
         BrokerageId.TD,
         "access",
@@ -70,6 +78,8 @@ def test_sign_out():
         auth_service.sign_out()
         assert auth_service.active_brokerage is None
         assert auth_service.active_tokens is None
+
+        assert mock_start_daemon.call_count == 3
 
 
 class TestRefreshAccess:
