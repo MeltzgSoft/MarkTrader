@@ -187,7 +187,6 @@ class TestRefreshAccess:
 
     def test_refresh_not_signed_in(self, auth_service_not_signed_in):
         auth_service = auth_service_not_signed_in
-        old_tokens = auth_service.active_tokens
         with mock.patch("services.authentication.safe_sleep") as mock_sleep, mock.patch(
             "services.brokerage.TDAmeritradeBrokerageService.refresh_tokens"
         ) as mock_refresh:

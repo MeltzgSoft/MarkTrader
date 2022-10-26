@@ -32,6 +32,7 @@ repos:
         additional_dependencies:
           - types-flask
           - types-requests
+          - types-PyYAML
         args:
           - --strict
           - --ignore-missing-imports
