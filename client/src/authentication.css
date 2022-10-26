@@ -1,0 +1,18 @@
+.signin-status {
+    border: 1px solid #999;
+    float: left;
+    font-weight: bold;
+    margin-right: -1px;
+    margin-top: -1px;
+    padding: 0;
+    text-align: center;
+    width: 100%;
+  }
+
+.signed-in {
+  background-color: green;
+}
+
+.signed-out {
+  background-color: red;
+}
