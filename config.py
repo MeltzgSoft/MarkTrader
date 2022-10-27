@@ -44,11 +44,11 @@ class GlobalConfig(ConfZ):
 
 
 class UserSettings(ConfZ):
-    symbols: t.List[str]
+    symbols: t.List[str] = Field(unique_items=True)
     end_of_day_exit: bool = False
     enable_automated_trading: bool = False
     trading_frequency_seconds: int = Field(default=5, gte=1)
-    position_size: float = Field(default=0, gt=0)
+    position_size: float = Field(default=10, gt=0)
 
     CONFIG_SOURCES = ConfZFileSource(file=Path("./user-settings.yml"))
 
@@ -56,11 +56,14 @@ class UserSettings(ConfZ):
     def update(
         cls, update_data: t.Dict[str, t.Union[int, float, bool, t.List[str]]]
     ) -> None:
-        with user_settings_update_lock, open(cls.CONFIG_SOURCES.file, mode="w") as f:
+        with user_settings_update_lock:
             existing = cls.__call__().dict()
             existing.update(update_data)
+            existing["symbols"] = [s.upper() for s in existing["symbols"]]
+            cfg_file = cls.CONFIG_SOURCES.file
             with UserSettings.change_config_sources(ConfZDataSource(data=existing)):
                 # access the updated settings to validate.
                 UserSettings()
-                yaml.dump(cls.confz_instance.dict(), f)
-                cls.confz_instance = None
+                with open(cfg_file, mode="w") as f:
+                    yaml.dump(cls.confz_instance.dict(), f)
+            cls.confz_instance = None

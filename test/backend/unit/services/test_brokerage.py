@@ -9,7 +9,7 @@ from config import GlobalConfig
 from services.brokerage import TDAmeritradeBrokerageService
 
 
-@pytest.mark.usefixtures("global_config")
+# @pytest.mark.usefixtures("global_config")
 class TestTDAmeritradeBrokerageService:
     @pytest.fixture
     def old_tokens(self):

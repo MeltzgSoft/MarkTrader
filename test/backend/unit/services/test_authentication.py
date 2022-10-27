@@ -10,7 +10,7 @@ from config import GlobalConfig
 from services.authentication import AuthenticationService, refresh_access
 from services.brokerage import TDAmeritradeBrokerageService
 
-pytestmark = pytest.mark.usefixtures("global_config")
+# pytestmark = pytest.mark.usefixtures("global_config")
 
 
 @pytest.fixture

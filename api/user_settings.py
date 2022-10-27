@@ -1,9 +1,11 @@
+import re
 import typing as t
 from http import HTTPStatus
 
 from flask import request
 from flask_restx import Namespace, Resource, fields
 from pydantic import ValidationError
+from pydantic.error_wrappers import ErrorList
 from werkzeug.exceptions import UnprocessableEntity
 
 from config import UserSettings
@@ -53,29 +55,28 @@ class UserSettingsResource(Resource):
     @api.expect(user_settings_response)
     def patch(
         self,
-    ) -> t.Union[
-        t.Dict[str, t.Union[int, float, bool, t.List[str]]],
-        t.Tuple[HTTPStatus, t.List[t.Dict[str, t.Any]]],
-    ]:
+    ) -> tuple[int, dict[str, ErrorList]] | dict[str, int | float | bool | list[str]]:
         args = request.get_json()
         auth_service = AuthenticationService()
         user_settings = UserSettings()
 
-        symbols = args.get("symbols")
         enable_automated_trading = args.get("enable_automated_trading")
 
-        if symbols is not None:
-            args["symbols"] = [s.upper() for s in symbols]
         if enable_automated_trading is not None:
             if enable_automated_trading and not auth_service.active_tokens:
                 raise UnprocessableEntity(
                     "Cannot enable automated trading. Application does not have an active brokerage"
                 )
 
+        # convert camel to snake
+        args = {
+            re.sub(r"(?<!^)(?=[A-Z])", "_", key).lower(): val
+            for key, val in args.items()
+        }
         try:
             user_settings.update(args)
         except ValidationError as e:
-            return HTTPStatus.UNPROCESSABLE_ENTITY, e.errors()
+            return HTTPStatus.UNPROCESSABLE_ENTITY, {"errors": e.errors()}
         return t.cast(
             t.Dict[str, t.Union[int, float, bool, t.List[str]]], UserSettings().dict()
         )

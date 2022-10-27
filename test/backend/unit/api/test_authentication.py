@@ -1,6 +1,5 @@
 import datetime
 
-import pytest
 from mock.mock import PropertyMock, patch
 
 from common.enums import BrokerageId
@@ -9,7 +8,7 @@ from config import GlobalConfig
 from services.authentication import AuthenticationService
 from services.brokerage import get_brokerage_service
 
-pytestmark = pytest.mark.usefixtures("global_config")
+# pytestmark = pytest.mark.usefixtures("global_config")
 
 
 def test_get_auth_url(client):
