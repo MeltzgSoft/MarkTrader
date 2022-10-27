@@ -1,10 +1,14 @@
+import threading
 import typing as t
 from pathlib import Path
 
 import yaml
-from confz import ConfZ, ConfZFileSource
+from confz import ConfZ, ConfZDataSource, ConfZFileSource
+from pydantic import Field
 
 from common.enums import BrokerageId
+
+user_settings_update_lock = threading.Lock()
 
 
 class ServerConfig(ConfZ):
@@ -41,15 +45,22 @@ class GlobalConfig(ConfZ):
 
 class UserSettings(ConfZ):
     symbols: t.List[str]
-    end_of_day_exit: bool = True
+    end_of_day_exit: bool = False
     enable_automated_trading: bool = False
-    trading_frequency_seconds: int = 5
-    position_size: float = 0
+    trading_frequency_seconds: int = Field(default=5, gte=1)
+    position_size: float = Field(default=0, gt=0)
 
     CONFIG_SOURCES = ConfZFileSource(file=Path("./user-settings.yml"))
 
     @classmethod
-    def save(cls) -> None:
-        with open(cls.CONFIG_SOURCES.file, mode="w") as f:
-            yaml.dump(cls.confz_instance.dict(), f)
-            cls.confz_instance = None
+    def update(
+        cls, update_data: t.Dict[str, t.Union[int, float, bool, t.List[str]]]
+    ) -> None:
+        with user_settings_update_lock, open(cls.CONFIG_SOURCES.file, mode="w") as f:
+            existing = cls.__call__().dict()
+            existing.update(update_data)
+            with UserSettings.change_config_sources(ConfZDataSource(data=existing)):
+                # access the updated settings to validate.
+                UserSettings()
+                yaml.dump(cls.confz_instance.dict(), f)
+                cls.confz_instance = None
