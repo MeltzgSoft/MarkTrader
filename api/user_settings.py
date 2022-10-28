@@ -55,7 +55,10 @@ class UserSettingsResource(Resource):
     @api.marshal_with(user_settings_response)
     def patch(
         self,
-    ) -> tuple[int, dict[str, ErrorList]] | dict[str, int | float | bool | list[str]]:
+    ) -> t.Union[
+        tuple[int, dict[str, ErrorList]],
+        dict[str, t.Union[int, float, bool, list[str]]],
+    ]:
         args = request.get_json()
         auth_service = AuthenticationService()
         user_settings = UserSettings()
