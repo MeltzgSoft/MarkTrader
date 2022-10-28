@@ -56,8 +56,8 @@ class UserSettingsResource(Resource):
     def patch(
         self,
     ) -> t.Union[
-        tuple[int, dict[str, ErrorList]],
-        dict[str, t.Union[int, float, bool, list[str]]],
+        t.Tuple[int, t.Dict[str, ErrorList]],
+        t.Dict[str, t.Union[int, float, bool, t.List[str]]],
     ]:
         args = request.get_json()
         auth_service = AuthenticationService()
