@@ -49,7 +49,7 @@ def test_patch_user_settings(client, user_settings_from_file, payload, expected_
 
     response = client.patch("/api/v1/userSettings/", json=payload)
 
-    assert response.status_code == expected_status
+    assert response.status_code == expected_status, response.json
 
     if expected_status == 200:
         original_settings_camel.update(payload)
