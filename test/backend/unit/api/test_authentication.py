@@ -1,15 +1,9 @@
-import datetime
-
 import pytest
-from mock.mock import PropertyMock, patch
+from mock.mock import patch
 
-from common.enums import BrokerageId
-from common.models import AuthTokens
 from config import GlobalConfig
 from services.authentication import AuthenticationService
 from services.brokerage import get_brokerage_service
-
-pytestmark = pytest.mark.usefixtures("global_config")
 
 
 def test_get_auth_url(client):
@@ -28,38 +22,24 @@ def test_get_auth_url_not_found(client):
     assert "Brokerage ID other is not recognized" in response.json["message"]
 
 
-def test_get_auth_status_signed_in(client):
+@pytest.mark.usefixtures("auth_service_signed_in")
+def test_get_auth_status_signed_in(client, tokens):
     config = GlobalConfig()
-    tokens = AuthTokens(
-        BrokerageId.TD,
-        "access_token",
-        datetime.datetime.now() + datetime.timedelta(minutes=30),
-        "refresh_token",
-        datetime.datetime.now() + datetime.timedelta(days=30),
-    )
-    with patch.object(
-        AuthenticationService, "active_tokens", new_callable=PropertyMock
-    ) as mock_tokens:
-        mock_tokens.return_value = tokens
 
-        response = client.get("/api/v1/auth/")
-        assert response.status_code == 200
-        assert response.json["id"] == tokens.brokerage_id.value
-        assert response.json["name"] == config.brokerage_map[tokens.brokerage_id].name
-        assert response.json["signedIn"]
+    response = client.get("/api/v1/auth/")
+    assert response.status_code == 200
+    assert response.json["id"] == tokens.brokerage_id.value
+    assert response.json["name"] == config.brokerage_map[tokens.brokerage_id].name
+    assert response.json["signedIn"]
 
 
+@pytest.mark.usefixtures("auth_service_signed_out")
 def test_get_auth_status_signed_out(client):
-    with patch.object(
-        AuthenticationService, "active_tokens", new_callable=PropertyMock
-    ) as mock_tokens:
-        mock_tokens.return_value = None
-
-        response = client.get("/api/v1/auth/")
-        assert response.status_code == 200
-        assert not response.json["id"]
-        assert not response.json["name"]
-        assert not response.json["signedIn"]
+    response = client.get("/api/v1/auth/")
+    assert response.status_code == 200
+    assert not response.json["id"]
+    assert not response.json["name"]
+    assert not response.json["signedIn"]
 
 
 def test_sign_out(client):
