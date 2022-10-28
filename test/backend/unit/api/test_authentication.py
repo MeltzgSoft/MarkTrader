@@ -8,8 +8,6 @@ from config import GlobalConfig
 from services.authentication import AuthenticationService
 from services.brokerage import get_brokerage_service
 
-# pytestmark = pytest.mark.usefixtures("global_config")
-
 
 def test_get_auth_url(client):
     config = GlobalConfig()

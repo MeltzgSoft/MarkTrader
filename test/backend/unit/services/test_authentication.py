@@ -10,8 +10,6 @@ from config import GlobalConfig
 from services.authentication import AuthenticationService, refresh_access
 from services.brokerage import TDAmeritradeBrokerageService
 
-# pytestmark = pytest.mark.usefixtures("global_config")
-
 
 @pytest.fixture
 def mock_start_daemon():
