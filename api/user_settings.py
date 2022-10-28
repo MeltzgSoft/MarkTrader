@@ -1,6 +1,5 @@
 import re
 import typing as t
-from http import HTTPStatus
 
 from flask import request
 from flask_restx import Namespace, Resource, fields
@@ -53,12 +52,19 @@ class UserSettingsResource(Resource):
 
     @api.doc("Update User Settings")
     @api.expect(user_settings_response)
+    @api.marshal_with(user_settings_response)
     def patch(
         self,
     ) -> tuple[int, dict[str, ErrorList]] | dict[str, int | float | bool | list[str]]:
         args = request.get_json()
         auth_service = AuthenticationService()
         user_settings = UserSettings()
+
+        # convert camel to snake
+        args = {
+            re.sub(r"(?<!^)(?=[A-Z])", "_", key).lower(): val
+            for key, val in args.items()
+        }
 
         enable_automated_trading = args.get("enable_automated_trading")
 
@@ -68,15 +74,10 @@ class UserSettingsResource(Resource):
                     "Cannot enable automated trading. Application does not have an active brokerage"
                 )
 
-        # convert camel to snake
-        args = {
-            re.sub(r"(?<!^)(?=[A-Z])", "_", key).lower(): val
-            for key, val in args.items()
-        }
         try:
             user_settings.update(args)
         except ValidationError as e:
-            return HTTPStatus.UNPROCESSABLE_ENTITY, {"errors": e.errors()}
+            raise UnprocessableEntity(e.errors())
         return t.cast(
             t.Dict[str, t.Union[int, float, bool, t.List[str]]], UserSettings().dict()
         )
