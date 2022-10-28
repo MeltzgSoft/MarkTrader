@@ -1,17 +1,6 @@
 import pytest
-from mock.mock import PropertyMock, patch
 
 from config import UserSettings
-from services.authentication import AuthenticationService
-
-
-@pytest.fixture
-def auth_service_signed_out():
-    with patch.object(
-        AuthenticationService, "active_tokens", new_callable=PropertyMock
-    ) as mock_tokens:
-        mock_tokens.return_value = None
-        yield
 
 
 def to_camel_case(snake_str):
@@ -40,6 +29,7 @@ def test_get_user_settings(client, user_settings):
         ),
     ],
 )
+@pytest.mark.usefixtures("auth_service_signed_in")
 def test_patch_user_settings(client, user_settings_from_file, payload, expected_status):
     original_settings, _ = user_settings_from_file
     original_settings = original_settings.dict()
