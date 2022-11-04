@@ -1,14 +1,25 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import Authenticator from './authentication';
+import Authenticator from './components/authentication';
+import UserSettingsPanel from './components/userSettingsPanel';
+import { UserSettings } from './common/models';
 
-class Application extends React.Component {
+class Application extends React.Component<Record<string, unknown>, UserSettings> {
     constructor(props: Record<string, unknown>) {
         super(props);
         this.state = {
-            isSignedIn: false
+            symbols: [],
+            endOfDayExit: false,
+            enableAutomatedTrading: false,
+            tradingFrequencySeconds: 5,
+            positionSize: 100
         }
+        this.handleUpdateUserSettings = this.handleUpdateUserSettings.bind(this);
+    }
+
+    handleUpdateUserSettings(data: object) {
+        console.log(data);
     }
 
     render(): React.ReactNode {
@@ -17,6 +28,7 @@ class Application extends React.Component {
         }
         return <div>
             <Authenticator/>
+            <UserSettingsPanel onUpdate={this.handleUpdateUserSettings} symbols={this.state.symbols} endOfDayExit={this.state.endOfDayExit} enableAutomatedTrading={this.state.enableAutomatedTrading} tradingFrequencySeconds={this.state.tradingFrequencySeconds} positionSize={this.state.positionSize}/>
         </div>
     }
 }

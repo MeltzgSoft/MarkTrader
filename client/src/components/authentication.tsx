@@ -1,5 +1,5 @@
 import React from 'react';
-import { getAuthUri, getSignInStatus, signOut } from './apiClient';
+import { getAuthUri, getSignInStatus, signOut } from '../common/apiClient';
 import './authentication.css'
 
 interface AuthenticatorState {

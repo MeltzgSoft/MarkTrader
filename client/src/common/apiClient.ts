@@ -1,14 +1,4 @@
-interface AuthUri {
-    id: string;
-    name: string;
-    uri: string;
-}
-
-interface AuthStatus {
-    id: string;
-    name: string;
-    signedIn: boolean;
-}
+import { AuthStatus, AuthUri } from "./models";
 
 async function getAuthUri(brokerageId: string): Promise<AuthUri> {
     const uri = new URL(`/api/v1/auth/${brokerageId}`, window.location.origin);
