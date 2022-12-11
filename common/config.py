@@ -6,7 +6,9 @@ import yaml
 from confz import ConfZ, ConfZDataSource, ConfZFileSource
 from pydantic import Field
 
-from common.enums import BrokerageId
+from models.brokerage import BrokerageId
+
+APP_NAME = "mark_trader"
 
 user_settings_update_lock = threading.Lock()
 

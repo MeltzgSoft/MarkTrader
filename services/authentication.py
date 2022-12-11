@@ -5,11 +5,10 @@ import typing as t
 
 import keyring
 
-from common.constants import APP_NAME
-from common.enums import BrokerageId
-from common.models import AuthTokens
+from common.config import APP_NAME, GlobalConfig
 from common.utils import safe_sleep
-from config import GlobalConfig
+from models.authentication import AuthTokens
+from models.brokerage import BrokerageId
 from services.brokerage import get_brokerage_service
 
 LOGGER = logging.getLogger(f"{APP_NAME}.auth_service")

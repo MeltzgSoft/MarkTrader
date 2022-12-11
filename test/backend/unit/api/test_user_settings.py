@@ -1,31 +1,22 @@
 import pytest
 
-from config import UserSettings
-
-
-def to_camel_case(snake_str):
-    components = snake_str.split("_")
-    # We capitalize the first letter of each component except the first one
-    # with the 'title' method and join them together.
-    return components[0] + "".join(x.title() for x in components[1:])
+from common.config import UserSettings
 
 
 def test_get_user_settings(client, user_settings):
     response = client.get("/api/v1/userSettings/")
     assert response.status_code == 200
-    assert response.json == {
-        to_camel_case(k): v for k, v in user_settings.dict().items()
-    }
+    assert response.json() == user_settings.dict()
 
 
 @pytest.mark.parametrize(
     "payload, expected_status",
     [
         pytest.param(
-            {"positionSize": 5, "enableAutomatedTrading": True}, 200, id="success"
+            {"position_size": 5, "enable_automated_trading": True}, 200, id="success"
         ),
         pytest.param(
-            {"positionSize": -5, "enableAutomatedTrading": True}, 422, id="fail"
+            {"position_size": -5, "enable_automated_trading": True}, 422, id="fail"
         ),
     ],
 )
@@ -33,17 +24,14 @@ def test_get_user_settings(client, user_settings):
 def test_patch_user_settings(client, user_settings_from_file, payload, expected_status):
     original_settings, _ = user_settings_from_file
     original_settings = original_settings.dict()
-    original_settings_camel = {
-        to_camel_case(k): v for k, v in original_settings.items()
-    }
 
     response = client.patch("/api/v1/userSettings/", json=payload)
 
     assert response.status_code == expected_status, response.json
 
     if expected_status == 200:
-        original_settings_camel.update(payload)
-        assert response.json == original_settings_camel
+        original_settings.update(payload)
+        assert response.json() == original_settings
     else:
         assert UserSettings().dict() == original_settings
 
@@ -55,7 +43,7 @@ def test_enable_trading_signed_out(client, user_settings_from_file):
 
     response = client.patch(
         "/api/v1/userSettings/",
-        json={"positionSize": 5, "enableAutomatedTrading": True},
+        json={"position_size": 5, "enable_automated_trading": True},
     )
 
     assert response.status_code == 422

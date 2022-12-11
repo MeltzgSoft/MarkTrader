@@ -4,9 +4,9 @@ import keyring
 import mock
 import pytest
 
-from common.enums import BrokerageId
-from common.models import AuthTokens
-from config import GlobalConfig
+from common.config import GlobalConfig
+from models.authentication import AuthTokens
+from models.brokerage import BrokerageId
 from services.authentication import AuthenticationService, refresh_access
 from services.brokerage import TDAmeritradeBrokerageService
 
@@ -19,11 +19,11 @@ def mock_start_daemon():
 
 def test_sign_in(mock_start_daemon):
     tokens = AuthTokens(
-        BrokerageId.TD,
-        "access",
-        datetime.datetime.now(),
-        "refresh",
-        datetime.datetime.now(),
+        brokerage_id=BrokerageId.TD,
+        access_token="access_token",
+        access_expiry=datetime.datetime.now(),
+        refresh_token="refresh_token",
+        refresh_expiry=datetime.datetime.now(),
     )
 
     auth_service = AuthenticationService("TEST")
@@ -57,11 +57,11 @@ def test_sign_in(mock_start_daemon):
 
 def test_sign_out(mock_start_daemon):
     tokens = AuthTokens(
-        BrokerageId.TD,
-        "access",
-        datetime.datetime.now(),
-        "refresh",
-        datetime.datetime.now(),
+        brokerage_id=BrokerageId.TD,
+        access_token="access_token",
+        access_expiry=datetime.datetime.now(),
+        refresh_token="refresh_token",
+        refresh_expiry=datetime.datetime.now(),
     )
 
     auth_service = AuthenticationService("TEST")
@@ -93,11 +93,11 @@ class TestRefreshAccess:
         auth_service = AuthenticationService("TEST-access-first")
         auth_service.set_access_keys(
             AuthTokens(
-                BrokerageId.TD,
-                "access_token",
-                datetime.datetime.now() + datetime.timedelta(minutes=30),
-                "refresh_token",
-                datetime.datetime.now() + datetime.timedelta(days=30),
+                brokerage_id=BrokerageId.TD,
+                access_token="access_token",
+                access_expiry=datetime.datetime.now() + datetime.timedelta(minutes=30),
+                refresh_token="refresh_token",
+                refresh_expiry=datetime.datetime.now() + datetime.timedelta(days=30),
             )
         )
         assert auth_service.active_tokens
@@ -109,11 +109,11 @@ class TestRefreshAccess:
         auth_service = AuthenticationService("TEST-refresh-first")
         auth_service.set_access_keys(
             AuthTokens(
-                BrokerageId.TD,
-                "access_token",
-                datetime.datetime.now() + datetime.timedelta(days=30),
-                "refresh_token",
-                datetime.datetime.now() + datetime.timedelta(minutes=30),
+                brokerage_id=BrokerageId.TD,
+                access_token="access_token",
+                access_expiry=datetime.datetime.now() + datetime.timedelta(days=30),
+                refresh_token="refresh_token",
+                refresh_expiry=datetime.datetime.now() + datetime.timedelta(minutes=30),
             )
         )
         assert auth_service.active_tokens
@@ -125,11 +125,11 @@ class TestRefreshAccess:
         auth_service = AuthenticationService("TEST-immediate")
         auth_service.set_access_keys(
             AuthTokens(
-                BrokerageId.TD,
-                "access_token",
-                datetime.datetime.now() + datetime.timedelta(seconds=1),
-                "refresh_token",
-                datetime.datetime.now() + datetime.timedelta(days=30),
+                brokerage_id=BrokerageId.TD,
+                access_token="access_token",
+                access_expiry=datetime.datetime.now() + datetime.timedelta(seconds=1),
+                refresh_token="refresh_token",
+                refresh_expiry=datetime.datetime.now() + datetime.timedelta(days=30),
             )
         )
         assert auth_service.active_tokens
@@ -165,11 +165,11 @@ class TestRefreshAccess:
         auth_service = request.getfixturevalue(auth_service)
         old_tokens = auth_service.active_tokens
         new_tokens = AuthTokens(
-            BrokerageId.TD,
-            "new-access_token",
-            datetime.datetime.now() + datetime.timedelta(minutes=30),
-            "new-refresh_token",
-            datetime.datetime.now() + datetime.timedelta(days=30),
+            brokerage_id=BrokerageId.TD,
+            access_token="new-access_token",
+            access_expiry=datetime.datetime.now() + datetime.timedelta(minutes=30),
+            refresh_token="new-refresh_token",
+            refresh_expiry=datetime.datetime.now() + datetime.timedelta(days=30),
         )
         with mock.patch("services.authentication.safe_sleep") as mock_sleep, mock.patch(
             "services.brokerage.TDAmeritradeBrokerageService.refresh_tokens",

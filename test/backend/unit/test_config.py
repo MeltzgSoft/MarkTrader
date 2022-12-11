@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from config import UserSettings
+from common.config import UserSettings
 
 
 class TestUserSettings:

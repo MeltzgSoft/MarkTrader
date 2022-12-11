@@ -10,13 +10,13 @@ export default class UserSettingsPanel extends React.Component<UserSettingsPanel
         super(props);
         this.handleChange = this.handleChange.bind(this);
     }
-    
+
     handleChange(setting: string, value: boolean): void {
         const obj: Record<string, unknown> = {};
         obj[setting] = value;
         this.props.onUpdate(obj);
     }
-    
+
     render(): React.ReactNode {
         return <div>
             <Slider label="Enable Automated Trading" onChange={(value: boolean) => this.handleChange("enableAutomatedTrading", value)} checked={this.props.enableAutomatedTrading}></Slider>
