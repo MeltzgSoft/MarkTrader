@@ -1,6 +1,6 @@
 import React from 'react';
 import { getAuthUri, getSignInStatus, signOut } from '../common/apiClient';
-import './authentication.css'
+import './authentication.css';
 
 interface AuthenticatorState {
     isSignedIn: boolean;
@@ -48,10 +48,10 @@ export default class Authenticator extends React.Component<Record<string, unknow
     }
 
     updateStatus(): void {
-        getSignInStatus().then(authStatus => this.setState({["isSignedIn"]: authStatus.signedIn}));
+        getSignInStatus().then(authStatus => this.setState({['isSignedIn']: authStatus.signed_in}));
     }
 
     signOut(): void {
-        signOut().then(_ => this.updateStatus())
+        signOut().then(this.updateStatus);
     }
 }

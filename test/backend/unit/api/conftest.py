@@ -2,37 +2,32 @@ import datetime
 
 import pytest
 from mock.mock import PropertyMock, patch
+from starlette.testclient import TestClient
 
 from app import app
-from common.enums import BrokerageId
-from common.models import AuthTokens
+from models.authentication import AuthTokens
+from models.brokerage import BrokerageId
 from services.authentication import AuthenticationService
 
 
 @pytest.fixture
 def trader_app():
-    app.config.update({"TESTING": True})
     yield app
 
 
 @pytest.fixture
 def client(trader_app):
-    return trader_app.test_client()
-
-
-@pytest.fixture
-def runner(trader_app):
-    return trader_app.test_cli_runner()
+    return TestClient(app)
 
 
 @pytest.fixture
 def tokens():
     return AuthTokens(
-        BrokerageId.TD,
-        "access_token",
-        datetime.datetime.now() + datetime.timedelta(minutes=30),
-        "refresh_token",
-        datetime.datetime.now() + datetime.timedelta(days=30),
+        brokerage_id=BrokerageId.TD,
+        access_token="access_token",
+        access_expiry=datetime.datetime.now() + datetime.timedelta(minutes=30),
+        refresh_token="refresh_token",
+        refresh_expiry=datetime.datetime.now() + datetime.timedelta(days=30),
     )
 
 

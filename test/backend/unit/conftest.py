@@ -6,7 +6,7 @@ import pytest
 import yaml
 from confz import ConfZDataSource, ConfZFileSource
 
-from config import GlobalConfig, UserSettings
+from common.config import GlobalConfig, UserSettings
 
 
 @pytest.fixture

@@ -3,9 +3,9 @@ import datetime
 import mock
 import pytest
 
-from common.enums import BrokerageId
-from common.models import AuthTokens
-from config import GlobalConfig
+from common.config import GlobalConfig
+from models.authentication import AuthTokens
+from models.brokerage import BrokerageId
 from services.brokerage import TDAmeritradeBrokerageService
 
 
@@ -14,11 +14,11 @@ class TestTDAmeritradeBrokerageService:
     @pytest.fixture
     def old_tokens(self):
         return AuthTokens(
-            BrokerageId.TD,
-            "access_token",
-            datetime.datetime.now() + datetime.timedelta(seconds=1),
-            "refresh_token",
-            datetime.datetime.now() + datetime.timedelta(days=30),
+            brokerage_id=BrokerageId.TD,
+            access_token="access_token",
+            access_expiry=datetime.datetime.now() + datetime.timedelta(seconds=1),
+            refresh_token="refresh_token",
+            refresh_expiry=datetime.datetime.now() + datetime.timedelta(days=30),
         )
 
     def test_get_access_tokens(self):

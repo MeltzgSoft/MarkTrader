@@ -24,6 +24,6 @@ export default class Toggle extends React.Component<ToggleProps> {
                 <input type="checkbox" onChange={this.handleChange}/>
                 <span className="toggle round"></span>
             </label>
-        </div>
+        </div>;
     }
 }

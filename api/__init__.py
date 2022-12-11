@@ -1,11 +1,7 @@
-from flask import Blueprint
-from flask_restx import Api
+from fastapi import FastAPI
 
-from api.authentication import api as auth
-from api.user_settings import api as user_settings
+from api import authentication, user_settings
 
-blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
-api = Api(blueprint, title="MarkTrader API", version="1.0", doc="/doc/", validate=True)
-
-api.add_namespace(auth)
-api.add_namespace(user_settings)
+router = FastAPI(docs_url="/docs")
+router.include_router(authentication.router)
+router.include_router(user_settings.router)

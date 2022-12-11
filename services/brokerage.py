@@ -7,10 +7,9 @@ from urllib.parse import quote_plus
 
 import requests
 
-from common.constants import APP_NAME
-from common.enums import BrokerageId
-from common.models import AuthTokens
-from config import GlobalConfig
+from common.config import APP_NAME, GlobalConfig
+from models.authentication import AuthTokens
+from models.brokerage import BrokerageId
 
 LOGGER = logging.getLogger(f"{APP_NAME}.brokerage_service")
 
