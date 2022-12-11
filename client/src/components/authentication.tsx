@@ -48,7 +48,7 @@ export default class Authenticator extends React.Component<Record<string, unknow
     }
 
     updateStatus(): void {
-        getSignInStatus().then(authStatus => this.setState({["isSignedIn"]: authStatus.signedIn}));
+        getSignInStatus().then(authStatus => this.setState({["isSignedIn"]: authStatus.signed_in}));
     }
 
     signOut(): void {

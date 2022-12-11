@@ -24,3 +24,8 @@ class AuthStatus(BaseModel):
     id: Optional[BrokerageId]
     name: Optional[str]
     signed_in: bool
+
+
+class AuthSignIn(BaseModel):
+    id: BrokerageId
+    code: str

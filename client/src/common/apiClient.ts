@@ -1,4 +1,4 @@
-import { AuthStatus, AuthUri } from "./models";
+import { AuthStatus, AuthUri, AuthSIgnInInfo } from "./models";
 
 async function getAuthUri(brokerageId: string): Promise<AuthUri> {
     const uri = new URL(`/api/v1/auth/${brokerageId}`, window.location.origin);
@@ -17,8 +17,23 @@ async function getSignInStatus(): Promise<AuthStatus> {
 async function signOut(): Promise<boolean> {
     const uri = new URL(`/api/v1/auth/`, window.location.origin);
     const res = await fetch(uri, {method: 'DELETE'});
-    const status = await res.status;
+    const status = res.status;
+    return status == 200;
+}
+
+async function signIn(brokerageId: string, accessCode: string): Promise<boolean> {
+    const signInInfo: AuthSIgnInInfo = {
+        id: brokerageId,
+        code: accessCode
+    };
+    const uri = new URL(`/api/v1/auth/`, window.location.origin);
+    const res = await fetch(uri, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(signInInfo)
+    });
+    const status = res.status;
     return status == 200
 }
 
-export {getAuthUri, getSignInStatus, signOut};
+export {getAuthUri, getSignInStatus, signOut, signIn};
