@@ -133,3 +133,4 @@ dmypy.json
 # private things
 config.yml
 user-settings.yml
+*.pem
