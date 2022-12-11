@@ -52,6 +52,6 @@ export default class Authenticator extends React.Component<Record<string, unknow
     }
 
     signOut(): void {
-        signOut().then(_ => this.updateStatus())
+        signOut().then(this.updateStatus)
     }
 }
