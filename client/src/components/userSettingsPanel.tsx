@@ -19,8 +19,8 @@ export default class UserSettingsPanel extends React.Component<UserSettingsPanel
 
     render(): React.ReactNode {
         return <div>
-            <Slider label="Enable Automated Trading" onChange={(value: boolean) => this.handleChange("enableAutomatedTrading", value)} checked={this.props.enable_automated_trading}></Slider>
-            <Slider label="Enable End of DayExit" onChange={(value: boolean) => this.handleChange("endOfDayExit", value)} checked={this.props.end_of_day_exit}></Slider>
-        </div>
+            <Slider label="Enable Automated Trading" onChange={(value: boolean) => this.handleChange('enableAutomatedTrading', value)} checked={this.props.enable_automated_trading}></Slider>
+            <Slider label="Enable End of DayExit" onChange={(value: boolean) => this.handleChange('endOfDayExit', value)} checked={this.props.end_of_day_exit}></Slider>
+        </div>;
     }
 }
