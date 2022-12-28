@@ -92,7 +92,7 @@ export default class UserSettingsPanel extends React.Component<UserSettingsPanel
                 data={this.wrappedSymbols()}
                 enableRowActions
                 positionActionsColumn='last'
-                renderRowActions={({ row, table }) => (
+                renderRowActions={({ row }) => (
                     <Box sx={{ display: 'flex', gap: '1rem' }}>
                         <Tooltip arrow placement="right" title="Delete">
                             <IconButton color="error" onClick={() => this.handleDeleteSymbol(row.getValue('symbol'))}>
