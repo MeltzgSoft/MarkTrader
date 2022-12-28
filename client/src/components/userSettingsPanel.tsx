@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createRef, RefObject } from 'react';
 import { UserSettings } from '../common/models';
 import { Box, FormControlLabel, IconButton, Stack, Switch, TextField, Tooltip } from '@mui/material';
 import MaterialReactTable from 'material-react-table';
@@ -8,9 +8,12 @@ interface UserSettingsPanelProps extends UserSettings {
     onUpdate: (data: Record<string, unknown>) => void;
 }
 export default class UserSettingsPanel extends React.Component<UserSettingsPanelProps> {
+    private addSymbolRef: RefObject<HTMLInputElement>;
+
     constructor(props: UserSettingsPanelProps) {
         super(props);
         this.handleChange = this.handleChange.bind(this);
+        this.addSymbolRef = createRef();
     }
 
     handleChange(setting: string, value: unknown): void {
@@ -25,7 +28,15 @@ export default class UserSettingsPanel extends React.Component<UserSettingsPanel
 
     handleDeleteSymbol(symbol: string): void {
         const symbols = this.props.symbols.filter((val: string) => val !== symbol);
-        this.handleChange("symbols", symbols);
+        this.handleChange('symbols', symbols);
+    }
+
+    handleAddSymbol(symbol: string): void {
+        const symbols = this.props.symbols.concat(symbol);
+        if (this.addSymbolRef.current) {
+            this.handleChange('symbols', symbols);
+            this.addSymbolRef.current.value = '';
+        }
     }
 
     render(): React.ReactNode {
@@ -65,10 +76,22 @@ export default class UserSettingsPanel extends React.Component<UserSettingsPanel
                         this.handleChange('position_size', event.target.valueAsNumber)
                 }
                 value={this.props.position_size} />
+            <TextField
+                label='Add New Symbol'
+                inputRef={this.addSymbolRef}
+                onKeyDown={
+                    (event: React.KeyboardEvent<HTMLInputElement>) => {
+                        const inputEvent = event.target as HTMLInputElement;
+                        if (event.key === 'Enter' && inputEvent.value) {
+                            this.handleAddSymbol(inputEvent.value);
+                        }
+                    }
+                } />
             <MaterialReactTable
                 columns={[{ accessorKey: 'symbol', header: 'Symbols' }]}
                 data={this.wrappedSymbols()}
                 enableRowActions
+                positionActionsColumn='last'
                 renderRowActions={({ row, table }) => (
                     <Box sx={{ display: 'flex', gap: '1rem' }}>
                         <Tooltip arrow placement="right" title="Delete">

@@ -21,7 +21,6 @@ class Application extends React.Component<Record<string, unknown>, UserSettings>
     }
 
     handleUpdateUserSettings(data: Record<string, unknown>) {
-        console.log(data);
         setUserSettings(data).then((settings: UserSettings) => this.setState(settings));
     }
 
