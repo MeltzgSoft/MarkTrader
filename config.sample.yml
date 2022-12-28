@@ -1,0 +1,7 @@
+server:
+  port: 8089
+  host: https://localhost
+brokerages:
+  - id: td-a
+    name: TD Ameritrade
+    client_id: <<CLIENT_ID>>

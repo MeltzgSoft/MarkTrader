@@ -1,0 +1,5 @@
+symbols: []
+end_of_day_exit: false
+enable_automated_trading: true
+trading_frequency_seconds: 1
+position_size: 20

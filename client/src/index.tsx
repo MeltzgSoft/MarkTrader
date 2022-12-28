@@ -4,7 +4,7 @@ import './index.css';
 import Authenticator from './components/authentication';
 import UserSettingsPanel from './components/userSettingsPanel';
 import { UserSettings } from './common/models';
-import { signIn } from './common/apiClient';
+import { getUserSettings, setUserSettings, signIn } from './common/apiClient';
 
 class Application extends React.Component<Record<string, unknown>, UserSettings> {
     constructor(props: Record<string, unknown>) {
@@ -16,11 +16,13 @@ class Application extends React.Component<Record<string, unknown>, UserSettings>
             trading_frequency_seconds: 5,
             position_size: 100
         };
+        getUserSettings().then((settings: UserSettings) => this.setState(settings));
         this.handleUpdateUserSettings = this.handleUpdateUserSettings.bind(this);
     }
 
-    handleUpdateUserSettings(data: object) {
+    handleUpdateUserSettings(data: Record<string, unknown>) {
         console.log(data);
+        setUserSettings(data).then((settings: UserSettings) => this.setState(settings));
     }
 
     render(): React.ReactNode {

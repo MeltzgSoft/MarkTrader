@@ -1,3 +1,4 @@
+import { Button, Stack } from '@mui/material';
 import React from 'react';
 import { getAuthUri, getSignInStatus, signOut } from '../common/apiClient';
 import './authentication.css';
@@ -32,11 +33,11 @@ export default class Authenticator extends React.Component<Record<string, unknow
             <AuthenticatorStatus isSignedIn={this.state.isSignedIn}></AuthenticatorStatus>
             <div>
                 {!this.state.isSignedIn ?
-                    <button onClick={this.initiateAuth}>Sign In</button> :
-                    <div>
-                        <button onClick={this.updateStatus}>Refresh Status</button>
-                        <button onClick={this.signOut}>Sign Out</button>
-                    </div>}
+                    <Button variant='contained' onClick={this.initiateAuth}>Sign In</Button> :
+                    <Stack spacing={0.5} direction='row'>
+                        <Button variant='contained' onClick={this.updateStatus}>Refresh Status</Button>
+                        <Button variant='contained' onClick={this.signOut}>Sign Out</Button>
+                    </Stack>}
             </div>
         </div>;
     }

@@ -1,4 +1,4 @@
-import { AuthStatus, AuthUri, AuthSIgnInInfo } from './models';
+import { AuthStatus, AuthUri, AuthSIgnInInfo as AuthSignInInfo, UserSettings } from './models';
 
 async function getAuthUri(brokerageId: string): Promise<AuthUri> {
     const uri = new URL(`/api/v1/auth/${brokerageId}`, window.location.origin);
@@ -22,7 +22,7 @@ async function signOut(): Promise<boolean> {
 }
 
 async function signIn(brokerageId: string, accessCode: string): Promise<boolean> {
-    const signInInfo: AuthSIgnInInfo = {
+    const signInInfo: AuthSignInInfo = {
         id: brokerageId,
         code: accessCode
     };
@@ -36,4 +36,22 @@ async function signIn(brokerageId: string, accessCode: string): Promise<boolean>
     return status === 200;
 }
 
-export {getAuthUri, getSignInStatus, signOut, signIn};
+async function getUserSettings(): Promise<UserSettings> {
+    const uri = new URL('/api/v1/userSettings/', window.location.origin);
+    const res = await fetch(uri);
+    const resJson = await res.json();
+    return resJson as UserSettings;
+}
+
+async function setUserSettings(data: Record<string, unknown>): Promise<UserSettings> {
+    const uri = new URL('/api/v1/userSettings/', window.location.origin);
+    const res = await fetch(uri, {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    });
+    const resJson = await res.json();
+    return resJson as UserSettings;
+}
+
+export {getAuthUri, getSignInStatus, signOut, signIn, getUserSettings, setUserSettings};
