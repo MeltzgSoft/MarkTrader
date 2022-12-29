@@ -1,8 +1,7 @@
 import React, { createRef, RefObject } from 'react';
 import { UserSettings } from '../common/models';
-import { Box, FormControlLabel, IconButton, Stack, Switch, TextField, Tooltip } from '@mui/material';
-import MaterialReactTable from 'material-react-table';
-import { Delete } from '@mui/icons-material';
+import { FormControlLabel, IconButton, List, ListItem, ListItemIcon, ListItemText, Stack, Switch, TextField } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 interface UserSettingsPanelProps extends UserSettings {
     onUpdate: (data: Record<string, unknown>) => void;
@@ -20,10 +19,6 @@ export default class UserSettingsPanel extends React.Component<UserSettingsPanel
         const obj: Record<string, unknown> = {};
         obj[setting] = value;
         this.props.onUpdate(obj);
-    }
-
-    wrappedSymbols(): Record<string, unknown>[] {
-        return this.props.symbols.map((val: string) => { return { symbol: val }; });
     }
 
     handleDeleteSymbol(symbol: string): void {
@@ -87,20 +82,18 @@ export default class UserSettingsPanel extends React.Component<UserSettingsPanel
                         }
                     }
                 } />
-            <MaterialReactTable
-                columns={[{ accessorKey: 'symbol', header: 'Symbols' }]}
-                data={this.wrappedSymbols()}
-                enableRowActions
-                positionActionsColumn='last'
-                renderRowActions={({ row }) => (
-                    <Box sx={{ display: 'flex', gap: '1rem' }}>
-                        <Tooltip arrow placement="right" title="Delete">
-                            <IconButton color="error" onClick={() => this.handleDeleteSymbol(row.getValue('symbol'))}>
-                                <Delete />
+            <List>
+                {this.props.symbols.sort().map((symbol: string) => {
+                    return <ListItem key={symbol}>
+                        <ListItemText primary={symbol} />
+                        <ListItemIcon>
+                            <IconButton color="error" onClick={() => this.handleDeleteSymbol(symbol)}>
+                                <DeleteIcon />
                             </IconButton>
-                        </Tooltip>
-                    </Box>
-                )} />
+                        </ListItemIcon>
+                    </ListItem>;
+                })}
+            </List>
         </Stack>;
     }
 }

@@ -16,6 +16,13 @@ class Application extends React.Component<Record<string, unknown>, UserSettings>
             trading_frequency_seconds: 5,
             position_size: 100
         };
+        if (window.location.search) {
+            const params = new URLSearchParams(window.location.search);
+            signIn('td-a', params.get('code') as string).then(
+                () => {
+                    window.location.replace(window.location.origin);
+                });
+        }
         getUserSettings().then((settings: UserSettings) => this.setState(settings));
         this.handleUpdateUserSettings = this.handleUpdateUserSettings.bind(this);
     }
@@ -25,13 +32,6 @@ class Application extends React.Component<Record<string, unknown>, UserSettings>
     }
 
     render(): React.ReactNode {
-        if (window.location.search) {
-            const params = new URLSearchParams(window.location.search);
-            signIn('td-a', params.get('code') as string).then(
-                () => {
-                    window.location.replace(window.location.origin);
-                });
-        }
         return <div>
             <Authenticator/>
             <UserSettingsPanel onUpdate={this.handleUpdateUserSettings} symbols={this.state.symbols} end_of_day_exit={this.state.end_of_day_exit} enable_automated_trading={this.state.enable_automated_trading} trading_frequency_seconds={this.state.trading_frequency_seconds} position_size={this.state.position_size}/>
