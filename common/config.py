@@ -8,8 +8,6 @@ from pydantic import Field
 
 from models.brokerage import BrokerageId
 
-APP_NAME = "mark_trader"
-
 user_settings_update_lock = threading.Lock()
 
 

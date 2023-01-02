@@ -5,17 +5,12 @@ import typing as t
 
 import keyring
 
-from common.config import APP_NAME, GlobalConfig
-from common.utils import safe_sleep
 from models.authentication import AuthTokens
 from models.brokerage import BrokerageId
-from services.brokerage import get_brokerage_service
 
-LOGGER = logging.getLogger(f"{APP_NAME}.auth_service")
+LOGGER = logging.getLogger(__name__)
 
 signin_lock = multiprocessing.RLock()
-daemon_lock = multiprocessing.Lock()
-daemon_proc = None
 
 
 class AuthenticationService:
@@ -69,18 +64,9 @@ class AuthenticationService:
                 )
             return None
 
-    def sign_in(self, brokerage_id: BrokerageId, access_code: str) -> None:
-        LOGGER.info(
-            f"Brokerage {brokerage_id}: retrieve access and refresh tokens",
-            extra={"brokerage_id": brokerage_id},
-        )
-
+    def sign_in(self, access_tokens: AuthTokens) -> None:
         self.sign_out()
-
-        brokerage = get_brokerage_service(brokerage_id)
-        access_tokens = brokerage.get_access_tokens(access_code)
         self.set_access_keys(access_tokens)
-        start_daemon()
 
     def set_access_keys(self, access_tokens: AuthTokens) -> None:
         with signin_lock:
@@ -121,53 +107,3 @@ class AuthenticationService:
                 for key in self._ALL_KEYS:
                     LOGGER.debug(f"Removing {key} from keyring")
                     keyring.delete_password(self._SYSTEM, key)
-        start_daemon()
-
-
-# The token daemon is responsible for keeping the active brokerage signed in
-def refresh_access(auth_service: AuthenticationService) -> None:
-    auth_tokens = auth_service.active_tokens
-    if not auth_tokens:
-        LOGGER.info("No active brokerage")
-        safe_sleep(GlobalConfig().authentication.login_check_delay_seconds)
-    else:
-        now = datetime.datetime.now()
-        access_remaining = auth_tokens.access_expiry - now
-        refresh_remaining = auth_tokens.refresh_expiry - now
-
-        update_refresh_token = refresh_remaining <= access_remaining
-
-        to_wait = max(
-            0,
-            int(min(access_remaining, refresh_remaining).total_seconds())
-            - GlobalConfig().authentication.refresh_buffer_seconds,
-        )
-
-        LOGGER.info(f"Refresh tokens in {to_wait} seconds")
-        LOGGER.info(f"Update refresh token? {update_refresh_token}")
-
-        safe_sleep(to_wait)
-        brokerage_service = get_brokerage_service(auth_tokens.brokerage_id)
-        new_auth_tokens = brokerage_service.refresh_tokens(
-            auth_tokens, update_refresh_token=update_refresh_token
-        )
-        auth_service.set_access_keys(new_auth_tokens)
-
-
-def _daemon_loop() -> None:
-    auth_service = AuthenticationService()
-    while True:
-        refresh_access(auth_service)
-
-
-def start_daemon() -> None:
-    global daemon_proc
-    with daemon_lock:
-        if daemon_proc is not None:
-            daemon_proc.terminate()
-        daemon_proc = multiprocessing.Process(
-            target=_daemon_loop,
-            daemon=True,
-            name="ACCESS_TOKEN_DAEMON",
-        )
-        daemon_proc.start()
