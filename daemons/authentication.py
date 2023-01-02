@@ -28,8 +28,7 @@ def sign_out() -> None:
     start_daemon()
 
 
-def refresh_access() -> None:
-    auth_service = AuthenticationService()
+def refresh_access(auth_service: AuthenticationService) -> None:
     auth_tokens = auth_service.active_tokens
     if not auth_tokens:
         LOGGER.info("No active brokerage")
@@ -60,7 +59,8 @@ def refresh_access() -> None:
 
 def _daemon_loop() -> None:
     while True:
-        refresh_access()
+        auth_service = AuthenticationService()
+        refresh_access(auth_service)
 
 
 def start_daemon() -> None:
