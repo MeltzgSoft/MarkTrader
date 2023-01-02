@@ -168,9 +168,9 @@ class TDAmeritradeBrokerageService(BaseBrokerageService):
         end_date_ms = end_date.timestamp() * 1000 if end_date else None
 
         query_parameters = {
-            "periodType": period_type.value,
+            "periodType": period_type.value if period_type else None,
             "period": periods,
-            "frequencyType": frequency_type.value,
+            "frequencyType": frequency_type.value if frequency_type else None,
             "frequency": frequency,
             "startDate": start_date_ms,
             "endDate": end_date_ms,

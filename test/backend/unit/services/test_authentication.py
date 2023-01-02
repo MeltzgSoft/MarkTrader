@@ -28,9 +28,7 @@ def test_sign_in():
         (auth_service._ACCESS_EXPIRY_KEY, str(tokens.access_expiry.timestamp())),
         (auth_service._REFRESH_EXPIRY_KEY, str(tokens.refresh_expiry.timestamp())),
     ]:
-        assert (
-            keyring.get_password(auth_service._SYSTEM, key) == expected_value
-        ), key
+        assert keyring.get_password(auth_service._SYSTEM, key) == expected_value, key
 
     assert auth_service.active_brokerage == BrokerageId.TD
     assert auth_service.active_tokens == tokens

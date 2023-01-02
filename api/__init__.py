@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from api import authentication, user_settings, price_history
+from api import authentication, price_history, user_settings
 
 router = FastAPI(docs_url="/docs")
 router.include_router(authentication.router)
