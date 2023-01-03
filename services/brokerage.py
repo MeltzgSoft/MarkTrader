@@ -63,6 +63,8 @@ class BaseBrokerageService(ABC):
         if not start_date and not end_date:
             periods = periods or 1
             frequency = frequency or 1
+            period_type = period_type or PeriodType.DAY
+            frequency_type = frequency_type or FrequencyType.MINUTE
         elif periods or frequency:
             raise InvalidInput(
                 "Cannot specify both period/frequency and start/end dates"
