@@ -1,5 +1,7 @@
-import { FormControl, FormControlLabel, InputLabel, MenuItem, Select, Switch } from '@mui/material';
+import { Label } from '@mui/icons-material';
+import { FormControl, FormControlLabel, InputLabel, MenuItem, Select, Switch, TextField } from '@mui/material';
 import { Stack } from '@mui/system';
+import { DateTimePicker } from '@mui/x-date-pickers';
 import React from 'react';
 import internal from 'stream';
 import getEnumKeys from '../common/helpers';
@@ -44,6 +46,7 @@ interface PriceHistoryProps {
 }
 interface PriceHistoryState {
     usePeriods: boolean;
+    useEndDate: boolean;
     periodType: PeriodType;
     periods: number;
     frequencyType: FrequencyType;
@@ -61,6 +64,7 @@ export default class PriceHistoryPanel extends React.Component<PriceHistoryProps
 
         this.state = {
             usePeriods: true,
+            useEndDate: false,
             periodType: PeriodType.DAY,
             periods: 1,
             frequencyType: FrequencyType.MINUTE,
@@ -129,8 +133,24 @@ export default class PriceHistoryPanel extends React.Component<PriceHistoryProps
 
     startEndControl() {
         return <Stack direction='row' spacing={1}>
-            
-        </Stack>
+            <DateTimePicker
+                label="Start Time"
+                value={new Date(this.state.startDate)}
+                onChange={newDate => this.setState({ startDate: newDate as Date })}
+                renderInput={(params) => <TextField {...params} />}
+            />
+            <FormControlLabel
+                label={`End ${this.state.useEndDate ? 'At' : 'Now'}`}
+                control={<Switch
+                    checked={this.state.useEndDate}
+                    onChange={event => this.setState({ useEndDate: event.target.checked })} />} />
+            {this.state.useEndDate && <DateTimePicker
+                label="End Time"
+                value={new Date(this.state.endDate || new Date())}
+                onChange={newDate => this.setState({ endDate: newDate as Date })}
+                renderInput={(params) => <TextField {...params} />}
+            />}
+        </Stack>;
     }
 
     render(): React.ReactNode {
