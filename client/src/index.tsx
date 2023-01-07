@@ -5,6 +5,8 @@ import Authenticator from './components/authentication';
 import UserSettingsPanel from './components/userSettingsPanel';
 import { UserSettings } from './common/models';
 import { getUserSettings, setUserSettings, signIn } from './common/apiClient';
+import PriceHistoryPanel from './components/priceHistory';
+import { Stack } from '@mui/system';
 
 class Application extends React.Component<Record<string, unknown>, UserSettings> {
     constructor(props: Record<string, unknown>) {
@@ -32,10 +34,13 @@ class Application extends React.Component<Record<string, unknown>, UserSettings>
     }
 
     render(): React.ReactNode {
-        return <div>
-            <Authenticator/>
-            <UserSettingsPanel onUpdate={this.handleUpdateUserSettings} symbols={this.state.symbols} end_of_day_exit={this.state.end_of_day_exit} enable_automated_trading={this.state.enable_automated_trading} trading_frequency_seconds={this.state.trading_frequency_seconds} position_size={this.state.position_size}/>
-        </div>;
+        return <Stack direction='row' spacing={1}>
+            <div>
+                <Authenticator />
+                <UserSettingsPanel onUpdate={this.handleUpdateUserSettings} symbols={this.state.symbols} end_of_day_exit={this.state.end_of_day_exit} enable_automated_trading={this.state.enable_automated_trading} trading_frequency_seconds={this.state.trading_frequency_seconds} position_size={this.state.position_size} />
+            </div>
+            <PriceHistoryPanel symbols={this.state.symbols} />
+        </Stack>;
     }
 }
 
