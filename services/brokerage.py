@@ -166,8 +166,8 @@ class TDAmeritradeBrokerageService(BaseBrokerageService):
     ) -> t.List[PriceHistory]:
         histories = []
 
-        start_date_ms = start_date.timestamp() * 1000 if start_date else None
-        end_date_ms = end_date.timestamp() * 1000 if end_date else None
+        start_date_ms = int(start_date.timestamp() * 1000) if start_date else None
+        end_date_ms = int(end_date.timestamp() * 1000) if end_date else None
 
         query_parameters = {
             "periodType": period_type.value if period_type else None,

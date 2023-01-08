@@ -5,6 +5,10 @@ import React from 'react';
 import { getPriceHistories } from '../common/apiClient';
 import getEnumKeys from '../common/helpers';
 import { FrequencyType, PeriodType, PriceHistory } from '../common/models';
+import CanvasJSReact from '../assets/canvasjs.react';
+
+const CanvasJS = CanvasJSReact.CanvasJS;
+const CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
 const validPeriods = {
     [PeriodType.DAY]: [1, 2, 3, 4, 5, 10],
@@ -79,11 +83,11 @@ export default class PriceHistoryPanel extends React.Component<PriceHistoryProps
                 endDate: this.state.useEndDate ? this.state.endDate : null
             });
         }
-        pricePromise.then(value => this.setState({priceData: value}));
+        pricePromise.then(value => this.setState({ priceData: value }));
     }
 
     frequencyPeriodControl() {
-        return <Stack direction='row' spacing={1}>
+        return <Stack direction='row' spacing={1} paddingTop={1}>
             <FormControl sx={{ m: 1, minWidth: 180 }}>
                 <InputLabel>Period Type</InputLabel>
                 <Select
@@ -162,7 +166,23 @@ export default class PriceHistoryPanel extends React.Component<PriceHistoryProps
     }
 
     render(): React.ReactNode {
+        const options = {
+            title: {
+                text: "Basic Column Chart in React"
+            },
+            data: [{
+                type: "column",
+                dataPoints: [
+                    { label: "Apple", y: 10 },
+                    { label: "Orange", y: 15 },
+                    { label: "Banana", y: 25 },
+                    { label: "Mango", y: 30 },
+                    { label: "Grape", y: 28 }
+                ]
+            }]
+        };
         return <div style={{ paddingTop: 30 }}>
+            <CanvasJSChart options = {options} />
             <Stack direction='row' spacing={1}>
                 <FormControlLabel
                     label='Period/Frequency'
