@@ -1,24 +1,10 @@
-import { Label } from '@mui/icons-material';
-import { FormControl, FormControlLabel, InputLabel, MenuItem, Select, Switch, TextField } from '@mui/material';
+import { Button, FormControl, FormControlLabel, InputLabel, MenuItem, Select, Switch, TextField } from '@mui/material';
 import { Stack } from '@mui/system';
 import { DateTimePicker } from '@mui/x-date-pickers';
 import React from 'react';
-import internal from 'stream';
+import { getPriceHistories } from '../common/apiClient';
 import getEnumKeys from '../common/helpers';
-
-enum PeriodType {
-    DAY = 'day',
-    MONTH = 'month',
-    YEAR = 'year',
-    YEAR_TO_DAY = 'ytd',
-}
-
-enum FrequencyType {
-    MINUTE = 'minute',
-    DAILY = 'day',
-    WEEKLY = 'weekly',
-    MONTHLY = 'monthly',
-}
+import { FrequencyType, PeriodType, PriceHistory } from '../common/models';
 
 const validPeriods = {
     [PeriodType.DAY]: [1, 2, 3, 4, 5, 10],
@@ -53,6 +39,7 @@ interface PriceHistoryState {
     frequency: number;
     startDate: Date;
     endDate: Date | null;
+    priceData: PriceHistory[];
 }
 export default class PriceHistoryPanel extends React.Component<PriceHistoryProps, PriceHistoryState> {
     constructor(props: PriceHistoryProps) {
@@ -71,7 +58,28 @@ export default class PriceHistoryPanel extends React.Component<PriceHistoryProps
             frequency: 1,
             startDate: yesterday,
             endDate: null,
+            priceData: []
         };
+
+        this.refreshData = this.refreshData.bind(this);
+    }
+
+    refreshData() {
+        let pricePromise: Promise<PriceHistory[]>;
+        if (this.state.usePeriods) {
+            pricePromise = getPriceHistories({
+                periodType: this.state.periodType,
+                periods: this.state.periods,
+                frequencyType: this.state.frequencyType,
+                frequency: this.state.frequency
+            });
+        } else {
+            pricePromise = getPriceHistories({
+                startDate: this.state.startDate,
+                endDate: this.state.useEndDate ? this.state.endDate : null
+            });
+        }
+        pricePromise.then(value => this.setState({priceData: value}));
     }
 
     frequencyPeriodControl() {
@@ -161,8 +169,8 @@ export default class PriceHistoryPanel extends React.Component<PriceHistoryProps
                     control={<Switch
                         checked={this.state.usePeriods}
                         onChange={event => this.setState({ usePeriods: event.target.checked })} />} />
-                {this.state.usePeriods && this.frequencyPeriodControl()}
-                {!this.state.usePeriods && this.startEndControl()}
+                {this.state.usePeriods ? this.frequencyPeriodControl() : this.startEndControl()}
+                <Button variant='contained' onClick={this.refreshData}>Refresh</Button>
             </Stack>
         </div>;
     }

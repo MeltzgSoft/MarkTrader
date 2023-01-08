@@ -1,3 +1,17 @@
+export enum PeriodType {
+    DAY = 'day',
+    MONTH = 'month',
+    YEAR = 'year',
+    YEAR_TO_DAY = 'ytd',
+}
+
+export enum FrequencyType {
+    MINUTE = 'minute',
+    DAILY = 'day',
+    WEEKLY = 'weekly',
+    MONTHLY = 'monthly',
+}
+
 export interface AuthUri {
     id: string;
     name: string;
@@ -21,4 +35,18 @@ export interface UserSettings {
 export interface AuthSIgnInInfo {
     id: string;
     code: string;
+}
+
+export interface PriceCandle {
+    open: number;
+    close: number;
+    high: number;
+    low: number;
+    volume: number;
+    datetime: number;
+}
+
+export interface PriceHistory {
+    symbol: string;
+    prices: PriceCandle[]
 }
