@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
+import daemons.authentication
 from common.config import GlobalConfig
 from models.authentication import AuthSignIn, AuthStatus, AuthUriInfo
 from models.brokerage import BrokerageId
@@ -45,11 +46,9 @@ async def get_auth_status() -> AuthStatus:
 
 @router.post("/")
 async def auth_sign_in(signin_info: AuthSignIn) -> None:
-    auth_service = AuthenticationService()
-    auth_service.sign_in(signin_info.id, signin_info.code)
+    daemons.authentication.sign_in(signin_info.id, signin_info.code)
 
 
 @router.delete("/")
 async def auth_sign_out() -> None:
-    auth_service = AuthenticationService()
-    auth_service.sign_out()
+    daemons.authentication.sign_out()

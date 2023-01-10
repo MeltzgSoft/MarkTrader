@@ -63,7 +63,7 @@ export default class UserSettingsPanel extends React.Component<UserSettingsPanel
                 }
                 value={this.props.trading_frequency_seconds} />
             <TextField
-                label='Position Size'
+                label='Position Size ($)'
                 type='number'
                 InputProps={{ inputProps: { min: 0 } }}
                 onChange={
