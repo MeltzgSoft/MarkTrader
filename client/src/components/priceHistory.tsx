@@ -105,7 +105,6 @@ export default class PriceHistoryPanel extends React.Component<PriceHistoryProps
         pricePromise.then(value => this.setState({
             priceData: value,
             chartData: value.map(this.toChartData)
-            // chartData: [this.toChartData(value[0])]
         }));
     }
 
@@ -189,10 +188,8 @@ export default class PriceHistoryPanel extends React.Component<PriceHistoryProps
     }
 
     render(): React.ReactNode {
-        console.log(this.state.chartData);
         return <div style={{ paddingTop: 30 }}>
             <CanvasJSChart options = {{
-            // theme: 'light2', // "light1", "light2", "dark1", "dark2"
             zoomEnabled: true,
             animationEnabled: true,
             exportEnabled: true,
