@@ -6,6 +6,7 @@ import { getPriceHistories } from '../common/apiClient';
 import getEnumKeys from '../common/helpers';
 import { FrequencyType, PeriodType, PriceHistory } from '../common/models';
 import CanvasJSReact from '../assets/canvasjs.react';
+import { type } from 'os';
 
 const CanvasJS = CanvasJSReact.CanvasJS;
 const CanvasJSChart = CanvasJSReact.CanvasJSChart;
@@ -44,6 +45,7 @@ interface PriceHistoryState {
     startDate: Date;
     endDate: Date | null;
     priceData: PriceHistory[];
+    chartData: Record<string, unknown>[];
 }
 export default class PriceHistoryPanel extends React.Component<PriceHistoryProps, PriceHistoryState> {
     constructor(props: PriceHistoryProps) {
@@ -62,10 +64,27 @@ export default class PriceHistoryPanel extends React.Component<PriceHistoryProps
             frequency: 1,
             startDate: yesterday,
             endDate: null,
-            priceData: []
+            priceData: [],
+            chartData: [],
         };
 
         this.refreshData = this.refreshData.bind(this);
+    }
+
+    toChartData(history: PriceHistory): Record<string, unknown> {
+        const chartData = history.prices.map(candle => {
+            return {
+                x: new Date(candle.datetime),
+                y: [candle.open, candle.high, candle.low, candle.close]
+            };
+        });
+        return {
+            type: 'candlestick',
+            showInLegend: true,
+            name: history.symbol,
+            yValueFormatString: '$###0.00',
+            dataPoints: chartData
+        };
     }
 
     refreshData() {
@@ -83,7 +102,11 @@ export default class PriceHistoryPanel extends React.Component<PriceHistoryProps
                 endDate: this.state.useEndDate ? this.state.endDate : null
             });
         }
-        pricePromise.then(value => this.setState({ priceData: value }));
+        pricePromise.then(value => this.setState({
+            priceData: value,
+            chartData: value.map(this.toChartData)
+            // chartData: [this.toChartData(value[0])]
+        }));
     }
 
     frequencyPeriodControl() {
@@ -166,23 +189,22 @@ export default class PriceHistoryPanel extends React.Component<PriceHistoryProps
     }
 
     render(): React.ReactNode {
-        const options = {
-            title: {
-                text: "Basic Column Chart in React"
-            },
-            data: [{
-                type: "column",
-                dataPoints: [
-                    { label: "Apple", y: 10 },
-                    { label: "Orange", y: 15 },
-                    { label: "Banana", y: 25 },
-                    { label: "Mango", y: 30 },
-                    { label: "Grape", y: 28 }
-                ]
-            }]
-        };
+        console.log(this.state.chartData);
         return <div style={{ paddingTop: 30 }}>
-            <CanvasJSChart options = {options} />
+            <CanvasJSChart options = {{
+            // theme: 'light2', // "light1", "light2", "dark1", "dark2"
+            zoomEnabled: true,
+            animationEnabled: true,
+            exportEnabled: true,
+            title:{
+                text: 'Intel Corporation Stock Price -  2017'
+            },
+            axisY: {
+                prefix: '$',
+                title: 'Price (in USD)'
+            },
+            data: this.state.chartData
+        }} />
             <Stack direction='row' spacing={1}>
                 <FormControlLabel
                     label='Period/Frequency'
